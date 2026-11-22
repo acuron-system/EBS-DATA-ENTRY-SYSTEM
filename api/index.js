@@ -29,6 +29,23 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Vercel maps /api/index.js to one serverless function. Preserve the original
+// Express route when vercel.json rewrites /api/* to this function.
+app.use((req, res, next) => {
+  try {
+    const parsed = new URL(req.url, 'http://vercel.local');
+    const forwardedPath = parsed.searchParams.get('__vercel_path');
+    if (forwardedPath && forwardedPath.startsWith('/api/')) {
+      parsed.searchParams.delete('__vercel_path');
+      req.url = forwardedPath + (parsed.searchParams.size ? '?' + parsed.searchParams.toString() : '');
+    }
+  } catch (err) {
+    return next(err);
+  }
+  next();
+});
+
+
 // Serve static assets from public directory
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
