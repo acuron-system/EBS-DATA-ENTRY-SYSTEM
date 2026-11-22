@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>District Education Portal | School Login</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(30, 58, 138, 0.06) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(15, 23, 42, 0.06) 0px, transparent 50%);
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+        .animate-shake {
+            animation: shake 0.35s ease-in-out;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between text-slate-800 antialiased selection:bg-blue-900 selection:text-white">
+
+    <!-- Top Institutional Header -->
+    <header class="w-full bg-slate-900 text-white border-b border-slate-800 shadow-sm">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-9 h-9 rounded-lg bg-blue-600/20 border border-blue-400/30 flex items-center justify-center text-blue-300">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222"/>
+                    </svg>
+                </div>
+                <div>
+                    <span class="font-semibold text-sm sm:text-base tracking-tight block leading-tight">EBS DATA ENTRY SYSTEM</span>
+                    <span class="text-[11px] text-slate-400 block">District Educational Office(Secondary)Marthandam</span>
+                </div>
+            </div>
+            <div class="hidden sm:flex items-center space-x-2 text-xs text-slate-300 bg-slate-800/80 px-3 py-1.5 rounded-full border border-slate-700/80">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Verified Institutions With UDISE Code</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Centered Content Area -->
+    <main class="flex-grow flex items-center justify-center px-4 py-8 sm:py-12">
+        <div class="w-full max-w-md">
+
+            <!-- VIEW 1: LOGIN CARD -->
+            <div id="loginView" class="bg-white rounded-2xl shadow-xl shadow-slate-200/70 border border-slate-200/80 overflow-hidden transition-all duration-300">
+                <!-- Card Top Accent & Title -->
+                <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-blue-950 px-6 sm:px-8 py-6 text-white">
+                    <div class="inline-flex items-center space-x-1.5 bg-white/10 backdrop-blur-sm px-2.5 py-1 rounded-md text-xs font-medium text-blue-200 mb-3">
+                        <svg class="w-5.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                        </svg>
+                        <span>Authorized School Access</span>
+                    </div>
+                    <h1 class="text-xl sm:text-2xl font-bold tracking-tight">EBS DATA ENTRY SYSTEM LOGIN </h1>
+                    <p class="text-slate-300 text-xs sm:text-sm mt-1">Enter your 11-digit UDISE Code for Login</p>
+                </div>
+
+                <!-- Login Form -->
+                <form id="loginForm" class="p-6 sm:p-8 space-y-5" novalidate>
+                    <!-- Error / Validation Alert Box -->
+                    <div id="errorAlert" class="hidden rounded-xl bg-red-50 border border-red-200 p-3.5 text-xs sm:text-sm text-red-700 flex items-start space-x-2.5" role="alert">
+                        <svg class="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <div>
+                            <p id="errorTitle" class="font-semibold text-red-800">Authentication Failed</p>
+                            <p id="errorMessage" class="mt-0.5 text-red-600 leading-relaxed"></p>
+                        </div>
+                    </div>
+
+                    <!-- UDISE Code (Username) Field -->
+                    <div>
+                        <div class="flex items-center justify-between mb-1.5">
+                            <label for="udiseInput" class="block text-xs sm:text-sm font-semibold text-slate-700">
+                                UDISE Code (Username)
+                            </label>
+                            <span id="digitCounter" class="text-[11px] font-mono text-slate-400">0 / 11 digits</span>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                </svg>
+                            </div>
+                            <input 
+                                type="text" 
+                                id="udiseInput" 
+                                name="udise"
+                                inputmode="numeric"
+                                maxlength="15"
+                                autocomplete="username"
+                                placeholder="e.g., 33300700117" 
+                                class="w-full pl-11 pr-10 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-mono tracking-wide text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-600/30 focus:border-blue-700 transition-all"
+                                required
+                            >
+                            <!-- Live UDISE match indicator icon -->
+                            <div id="udiseMatchBadge" class="hidden absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none" title="Valid UDISE Code found">
+                                <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Password Field -->
+                    <div>
+                        <div class="flex items-center justify-between mb-1.5">
+                            <label for="passwordInput" class="block text-xs sm:text-sm font-semibold text-slate-700">
+                                Password
+                            </label>
+                            <span class="text-[11px] text-slate-400">Format: &lt;UDISE_Code&gt;@123</span>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                                </svg>
+                            </div>
+                            <input 
+                                type="password" 
+                                id="passwordInput" 
+                                name="password"
+                                autocomplete="current-password"
+                                placeholder="Enter institutional password" 
+                                class="w-full pl-11 pr-11 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-600/30 focus:border-blue-700 transition-all"
+                                required
+                            >
+                            <!-- Show/Hide Password Toggle Button -->
+                            <button 
+                                type="button" 
+                                id="togglePasswordBtn" 
+                                aria-label="Show password"
+                                class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-700 focus:outline-none transition-colors"
+                            >
+                                <!-- Eye Open Icon -->
+                                <svg id="eyeOpenIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                                <!-- Eye Off Icon -->
+                                <svg id="eyeOffIcon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button 
+                        type="submit" 
+                        class="w-full py-3 px-4 bg-slate-900 hover:bg-blue-950 active:scale-[0.99] text-white font-semibold text-sm rounded-xl shadow-md shadow-slate-900/15 transition-all flex items-center justify-center space-x-2 cursor-pointer"
+                    >
+                        <span>Verify &amp; Sign In</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                        </svg>
+                    </button>
+                </form>
+            </div>
+
+            <!-- VIEW 2: POST-LOGIN WELCOME / CONFIRMATION SCREEN -->
+            <div id="welcomeView" class="hidden bg-white rounded-2xl shadow-xl shadow-slate-200/70 border border-slate-200/80 overflow-hidden transition-all duration-300">
+                <!-- Success Header Banner -->
+                <div class="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 px-6 sm:px-8 py-7 text-white relative overflow-hidden">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="inline-flex items-center space-x-1.5 bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 px-3 py-1 rounded-full text-xs font-semibold">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            <span>Session Authenticated</span>
+                        </span>
+                        <span class="text-xs font-mono text-slate-300 bg-white/10 px-2.5 py-1 rounded-md">
+                            UDISE: <strong id="welcomeUdiseBadge" class="text-white font-semibold"></strong>
+                        </span>
+                    </div>
+
+                    <p class="text-xs uppercase tracking-wider text-blue-300 font-semibold mb-1">Institution Verified</p>
+                    <h2 id="welcomeHeading" class="text-xl sm:text-2xl font-bold leading-snug text-white">
+                        Welcome!
+                    </h2>
+                </div>
+
+                <!-- School Details & Session Summary -->
+                <div class="p-6 sm:p-8 space-y-5">
+                    <div class="bg-slate-50 border border-slate-200/90 rounded-xl p-4 space-y-3">
+                        <div class="flex items-start justify-between gap-3 pb-3 border-b border-slate-200/80">
+                            <div>
+                                <span class="text-[11px] font-medium uppercase tracking-wider text-slate-400 block">Registered School Name</span>
+                                <span id="detailSchoolName" class="text-sm font-bold text-slate-900 mt-0.5 block"></span>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                            <div>
+                                <span class="text-slate-400 block">UDISE Code</span>
+                                <span id="detailUdiseCode" class="font-mono font-semibold text-slate-800 mt-0.5 block"></span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block">Login Timestamp</span>
+                                <span id="detailTimestamp" class="font-medium text-slate-800 mt-0.5 block"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Portal Status Notice -->
+                    <div class="flex items-center space-x-3 p-3.5 rounded-xl bg-blue-50/70 border border-blue-100 text-xs text-blue-900">
+                        <svg class="w-5 h-5 text-blue-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                        </svg>
+                        <p class="leading-relaxed">Your institutional credentials have been verified against the official district registry.</p>
+                    </div>
+
+                    <!-- Logout Action -->
+                    <button 
+                        type="button" 
+                        id="logoutBtn"
+                        class="w-full py-3 px-4 bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 font-semibold text-sm rounded-xl shadow-sm transition-all flex items-center justify-center space-x-2 cursor-pointer"
+                    >
+                        <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                        </svg>
+                        <span>Accept and Continue</span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full py-4 px-4 text-center text-xs text-slate-500 border-t border-slate-200/80 bg-white/60">
+        <p>School EBS Management System &bull; Copyright © DEO Marthandam</p>
+    </footer>
+
+    <!-- Application Script -->
+    <script>
+        /**
+         * Complete mapping of all 138 UDISE_Code to School_Name records
+         */
+        const SCHOOL_DIRECTORY = {
+            "33300700117": "ABRAHAM MEMORIAL .HSS-MARUTHANCODE",
+            "33300700414": "AIDED HIGHER SECONDARY SCHOOL, MOTTAKALAI",
+            "33300600714": "AIDED HS. KATTATHURAI",
+            "33300500319": "AMALA CONVENT(G) H.S.S,THUCKALAY",
+            "33300900311": "AMSI HIGH SCHOOL",
+            "33300600412": "ARUNACHALAM HSS., THIRUVATTAR",
+            "33300500513": "CARMAL GIRLS HSS MANALIKARAI",
+            "33300900709": "CHRIST THE KING HS PIRACODE",
+            "33300500210": "CHRISTUCOIL LMS HR SEC SCHOOL PALLIYADI",
+            "33300800708": "CONCORDIA HR.SEC.SCHOOL-POTTETI",
+            "33300900117": "CONCORDIA LUTHERAN HIGH SCHOOL,  KALPARAPOTTAI",
+            "33300800618": "CSI SCHOOL FOR THE BLIND, IRENIPURAM",
+            "33300900614": "CSI VV (G) HS IRENIPURAM",
+            "33300900612": "CSI VV HSS IRENIPURAM",
+            "33300600503": "DEVASAM H.S. THIRPARAPPU",
+            "33300700206": "G H S  KALIAKKAVILAI",
+            "33300700207": "G H S MECODE",
+            "33300700228": "G H S S (BOYS)MARTHANDAM",
+            "33300700229": "G H S S GIRLS MARTHANDAM",
+            "33300700225": "G H S S VILAVANCODE",
+            "33300700419": "GBFM HS DEVICODE",
+            "33300900706": "GHS ATHENCODE",
+            "33300700110": "GHS CHEMMANKALAI",
+            "33300800609": "GHS KANJIRACODE",
+            "33300800417": "GHS KEEZHKULAM WEST",
+            "33300600423": "GHS KESAVAPURAM",
+            "33300600907": "GHS KOTHAYAR LOWER CAMP",
+            "33300500515": "GHS KUMARAPURAM",
+            "33300700111": "GHS MELPURAM",
+            "33300500802": "GHS PERUNCHILAMBU",
+            "33300500606": "GHS PEYANKUZHI",
+            "33300700902": "GHS- PULIYOORSALAI",
+            "33300600307": "GHS THACHOOR",
+            "33300800311": "GHS UDAYA MARTHANDAM",
+            "33300800610": "GHS UNNAMALAIKADAI",
+            "33300500106": "GHS VATHIYARKONAM",
+            "33300700810": "GHS- VELLAMCODE",
+            "33300600106": "GHS VILLUNNIKONAM",
+            "33300500605": "GHS(GIRLS),ERANIEL",
+            "33300600114": "GHS. CHERUKOLE",
+            "33300600408": "GHS. CHERUPPALOR",
+            "33300600707": "GHS. ERAVIPUTHOORKADAI",
+            "33300600604": "GHS. PONMANAI",
+            "33300600803": "GHS. THIRUNANTHIKARAI",
+            "33300600409": "GHS. THIRUVARAMBU",
+            "33300600410": "GHS. THIRUVATTAR",
+            "33300600706": "GHS. VEEYANOOR",
+            "33300600208": "GHS.POOVANCODE",
+            "33300800705": "GHSS KARUNGAL",
+            "33300600708": "GHSS KATTATHURAI",
+            "33300800406": "GHSS KEEZHKULAM",
+            "33300800312": "GHSS MATHICODE",
+            "33300800611": "GHSS NATTALAM",
+            "33300700112": "GHSS THIKKURICHY",
+            "33300600606": "GHSS. KULASEKARAM",
+            "33300500607": "GHSS.KANDANVILAI",
+            "33300700811": "GHSS-ARUMANAI",
+            "33300500712": "GHSS-KANNATTUVILAI",
+            "33300800105": "GHSS-NALLOOR",
+            "33300700306": "GHSS-PALUKAL",
+            "33300500711": "GHSS-THRIVITHANCODE",
+            "33300900107": "GOVERNMENT  HIGHER SECONDARY  SCHOOL ,KOLLENCODE",
+            "33300900307": "GOVERNMENT HIGH SCHOOL  ANANTHAMANGALAM",
+            "33300500404": "GOVERNMENT HIGH SCHOOL, MOOLACHI",
+            "33300700711": "GOVERNMENT HIGH SCHOOL,UTHIRAMCODE",
+            "33300900308": "GOVERNMENT HIGHER SECONDARY SCHOOL  THENGAPATTANAM",
+            "33300500308": "GOVERNMENT HIGHER SECONDARY SCHOOL,KALKULAM",
+            "33300700603": "GOVERNMENT MODEL HIGHER SECONDARY SCHOOL  KADAYAL",
+            "33300900408": "GOVERNMENT MODEL HIGHER SECONDARY SCHOOL MUNCHIRAI",
+            "33300700605": "GOVERNMENT TRIBAL RESIDENTIAL HIGHER SECONDARY SCHOOL, PATHUKANI",
+            "33300900226": "GOVT ADW HIGHER SECONDARY SCHOOL KALINGARAJAPURAM",
+            "33300600605": "GOVT HIGH SCHOOL MANGALAM",
+            "33300900607": "GOVT HS MARAYAPURAM",
+            "33300900705": "GOVT HS PALKULAM",
+            "33300900208": "GOVT HSS EZHUDESAPATTU",
+            "33300500310": "GOVT MODEL HR SEC SCHOOL THUCKALAY",
+            "33300600504": "GOVT. TRIBAL RESIDENTIAL HSS PECHIPPARAI",
+            "33300600908": "GTR HIGH SCHOOL -MANALODAI",
+            "33300500609": "HACKER MEMORIAL HSS ,NEYYOOR",
+            "33300700416": "HF HSS MUKKUTTUKAL",
+            "33300700610": "HOLY FAMILY H S ARUKANI",
+            "33300700812": "HSS-ARUMANAI",
+            "33300500715": "INFANT JESUS GIRLS HIGH SCHOOL -  MULAGUMOODU",
+            "33300700813": "KAMARAJ MEMORIAL HSS-PANTHALUVILAI, MANJALUMOODU",
+            "33300700232": "L M S GIRLS H S S MARTHANDAM",
+            "33300700231": "L.M.S HIGHER SECONDARY SCHOOL FOR BOYS,MARTHANDAM.",
+            "33300800210": "LMS HSS - MATHICODE",
+            "33300500514": "LMS HSS KADAMALAIKUNTU",
+            "33300900710": "M.M.K.M. H.S. VARUTHATTU",
+            "33300600211": "M.V. H.S. CHENKODI",
+            "33300900118": "MAR GREGORIOS M.S.C. HIGH SCHOOL KIRATHOOR",
+            "33300700237": "MJKM MSC.HR.SEC. SCHOOL, CHRISTURAJAPURAM -MARTHANDAM",
+            "33300900214": "PIUS XI  HSS  THOOTHOOR",
+            "33300700707": "PPM H S S ANDUCODE",
+            "33300700415": "PRIVATE HSS KALLUPALAM",
+            "33300500209": "RC HIGH SCHOOL PALLIYADI",
+            "33300500511": "RCHS CHEMPARUTHIVILAI",
+            "33300900122": "RTM LMS HSS VENKANCHI",
+            "33300700116": "SACRED HEART H S PACODE",
+            "33300900120": "SREEDEVI GIRLS Higher Secondary  School  KOLLAMCODE",
+            "33300900121": "ST ALOYSIUS HSS MARTHANDANTHURAI",
+            "33300900610": "ST ANTONYS HS KAPPUKADU",
+            "33300900411": "ST FRANCIS HSS  VAVARAI",
+            "33300700311": "ST JAMES H S PARAKUNNU",
+            "33300900116": "ST JOSEPH HIGH SCHOOL,  SILUVAIPURAM",
+            "33300900213": "ST JOSEPH HS KARUNYAPURAM",
+            "33300500716": "ST JOSEPH'S HSS MULAGUMOODU",
+            "33300700221": "ST JOSEPH'S HSS THIRUTHAPURAM",
+            "33300700612": "ST MARYS HSS KALIYAL",
+            "33300700413": "ST MARYS HSS MELPALAI",
+            "33300900129": "ST NICHOLAS HIGH SCHOOL NEERODITHURAI",
+            "33300900119": "ST STEPHEN HIGH SCHOOL  SOUTHPALAVILAI",
+            "33300800617": "ST. AHS ELAVUVILAI",
+            "33300800412": "ST. AHSS ENAMPUTHENTHURAI",
+            "33300800209": "ST. ALOYSIUS GIRLS HSS VELLIAVILAI",
+            "33300800318": "ST. ANTONY'S  HIGH SCHOOL ,THUNDATHUVILAI",
+            "33300800707": "ST. ANTONY'S HIGH SCHOOL, MULLANGANAVILAI",
+            "33300600906": "ST. ANTONY'S HS. SURULACODE",
+            "33300800319": "ST. BERNADETTE'S HSS MANGALAKUNTU",
+            "33300800509": "ST. FRANCIS HSS VENCODE",
+            "33300800208": "ST. FRANCIS XAVIER H.S - ALANCHI",
+            "33300800411": "ST. HELEN HS ENAYAM",
+            "33300800507": "ST. JHS VALIYAVILAI",
+            "33300800413": "ST. JO HS-RAMANTHURAI",
+            "33300800615": "ST. JOHN VIANNEY'S GIRLS' HR. SEC. SCHOOL , PALLIYADI",
+            "33300600712": "ST. JOSEPH'S HIGH SCHOOL MULAVILAI",
+            "33300600713": "ST. JOSEPH'S HIGH SCHOOL PILANKALAI",
+            "33300800508": "ST. JOSEPH'S HIGHER SECONDARY SCHOOL VIZHUNTHAYAMBALAM",
+            "33300500516": "ST. MARY GORETTY HSS  MANALIKARAI",
+            "33300800616": "ST. MSC HS NATTALAM",
+            "33300600506": "ST. PETER'S HSS. CHEKKAL",
+            "33300600805": "ST. URSULA'S GIRLS HSS KULASEKHARAM",
+            "33300900510": "ST.EPHREM'S M.S.C  HSS, SOORIACODE",
+            "33300800325": "ST.JOSEPH HIGH SCHOOL-MATHIRAVILAI",
+            "33300500109": "St.Joseph's M.S.C.H.S.S,Chellamkonam",
+            "33300700611": "ST.THOMAS HIGH SCHOOL-NETTA",
+            "33300700209": "T. C. K. H. S. S PADANTHALUMOODU",
+            "33300600109": "YETTACODE HSS. YETTACODE"
+        };
+
+        // DOM Elements
+        const loginView = document.getElementById('loginView');
+        const welcomeView = document.getElementById('welcomeView');
+        const loginForm = document.getElementById('loginForm');
+        const udiseInput = document.getElementById('udiseInput');
+        const passwordInput = document.getElementById('passwordInput');
+        const digitCounter = document.getElementById('digitCounter');
+        const udiseMatchBadge = document.getElementById('udiseMatchBadge');
+        const togglePasswordBtn = document.getElementById('togglePasswordBtn');
+        const eyeOpenIcon = document.getElementById('eyeOpenIcon');
+        const eyeOffIcon = document.getElementById('eyeOffIcon');
+
+        // Error Alert Elements
+        const errorAlert = document.getElementById('errorAlert');
+        const errorTitle = document.getElementById('errorTitle');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // Welcome View Elements
+        const welcomeUdiseBadge = document.getElementById('welcomeUdiseBadge');
+        const welcomeHeading = document.getElementById('welcomeHeading');
+        const detailSchoolName = document.getElementById('detailSchoolName');
+        const detailUdiseCode = document.getElementById('detailUdiseCode');
+        const detailTimestamp = document.getElementById('detailTimestamp');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        /**
+         * Updates digit counter and match badge when typing UDISE code
+         */
+        function handleUdiseInput() {
+            const trimmed = udiseInput.value.trim();
+            digitCounter.textContent = `${trimmed.length} / 11 digits`;
+
+            if (Object.prototype.hasOwnProperty.call(SCHOOL_DIRECTORY, trimmed)) {
+                udiseMatchBadge.classList.remove('hidden');
+                digitCounter.classList.remove('text-slate-400');
+                digitCounter.classList.add('text-emerald-600', 'font-semibold');
+            } else {
+                udiseMatchBadge.classList.add('hidden');
+                digitCounter.classList.add('text-slate-400');
+                digitCounter.classList.remove('text-emerald-600', 'font-semibold');
+            }
+
+            hideError();
+        }
+
+        udiseInput.addEventListener('input', handleUdiseInput);
+        passwordInput.addEventListener('input', hideError);
+
+        /**
+         * Show/Hide Password Toggle
+         */
+        togglePasswordBtn.addEventListener('click', () => {
+            const isPassword = passwordInput.type === 'password';
+            passwordInput.type = isPassword ? 'text' : 'password';
+            togglePasswordBtn.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+            eyeOpenIcon.classList.toggle('hidden', isPassword);
+            eyeOffIcon.classList.toggle('hidden', !isPassword);
+        });
+
+        /**
+         * Display validation error with subtle shake animation
+         */
+        function showError(title, message) {
+            errorTitle.textContent = title;
+            errorMessage.textContent = message;
+            errorAlert.classList.remove('hidden', 'animate-shake');
+            void errorAlert.offsetWidth; // trigger reflow to restart animation
+            errorAlert.classList.add('animate-shake');
+        }
+
+        function hideError() {
+            errorAlert.classList.add('hidden');
+        }
+
+        /**
+         * Form Submission & Authentication Logic
+         */
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            hideError();
+
+            const enteredUdise = udiseInput.value.trim();
+            const enteredPassword = passwordInput.value;
+
+            // 1. Check empty input
+            if (!enteredUdise) {
+                showError('UDISE Code Required', 'Please enter your 11-digit institutional UDISE Code.');
+                udiseInput.focus();
+                return;
+            }
+
+            // 2. Validate 11-digit format
+            if (!/^\d{11}$/.test(enteredUdise)) {
+                showError(
+                    'Invalid UDISE Code Format',
+                    `A valid UDISE Code must be exactly 11 numeric digits (you entered ${enteredUdise.length} character${enteredUdise.length === 1 ? '' : 's'}).`
+                );
+                udiseInput.focus();
+                return;
+            }
+
+            // 3. Verify UDISE code exists in the 138-school registry
+            if (!Object.prototype.hasOwnProperty.call(SCHOOL_DIRECTORY, enteredUdise)) {
+                showError(
+                    'Unrecognized UDISE Code',
+                    `The UDISE Code "${enteredUdise}" was not found in the 138 registered district schools.`
+                );
+                udiseInput.focus();
+                return;
+            }
+
+            // 4. Verify password matches exact <UDISE_Code>@123 pattern
+            const expectedPassword = `${enteredUdise}@123`;
+            if (!enteredPassword) {
+                showError('Password Required', 'Please enter your institutional UDISE Code With @123.');
+                passwordInput.focus();
+                return;
+            }
+
+            if (enteredPassword !== expectedPassword) {
+                const hasAt123Suffix = enteredPassword.endsWith('@123');
+                const hint = hasAt123Suffix
+                    ? 'The UDISE prefix in your password does not match the entered UDISE Code.'
+                    : 'Password must follow the exact format: <UDISE_Code>@123 (case-sensitive, no extra spaces).';
+
+                showError('Incorrect Password', hint);
+                passwordInput.focus();
+                return;
+            }
+
+            // 5. Authentication Successful -> Transition to Welcome View
+            const matchedSchoolName = SCHOOL_DIRECTORY[enteredUdise];
+            showWelcomeScreen(enteredUdise, matchedSchoolName);
+        });
+
+        /**
+         * Transitions from Login Card to Post-Login Welcome Screen
+         */
+        function showWelcomeScreen(udiseCode, schoolName) {
+            const now = new Date();
+            const formattedTimestamp = now.toLocaleString('en-IN', {
+                dateStyle: 'medium',
+                timeStyle: 'short'
+            });
+
+            welcomeUdiseBadge.textContent = udiseCode;
+            welcomeHeading.textContent = `Welcome, ${schoolName}!`;
+            detailSchoolName.textContent = schoolName;
+            detailUdiseCode.textContent = udiseCode;
+            detailTimestamp.textContent = formattedTimestamp;
+
+            loginView.classList.add('hidden');
+            welcomeView.classList.remove('hidden');
+        }
+
+        /**
+         * Logout Handler -> Resets state and returns to Login Screen
+         */
+        logoutBtn.addEventListener('click', () => {
+            passwordInput.value = '';
+            passwordInput.type = 'password';
+            eyeOpenIcon.classList.remove('hidden');
+            eyeOffIcon.classList.add('hidden');
+            hideError();
+
+            welcomeView.classList.add('hidden');
+            loginView.classList.remove('hidden');
+            udiseInput.focus();
+        });
+    </script>
+</body>
+</html>

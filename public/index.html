@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EBS DATA ENTRY SYSTEM | District Educational Office Marthandam</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Custom styles -->
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8fafc;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(30, 58, 138, 0.04) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(15, 23, 42, 0.04) 0px, transparent 50%);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col text-slate-800 antialiased selection:bg-blue-900 selection:text-white">
+
+  <!-- File Protocol Alert Banner (shown only when opened directly via file:///) -->
+  <script>
+    if (window.location.protocol === 'file:') {
+      document.write(`
+        <div id="fileNoticeBanner" class="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500 text-slate-950 font-medium px-4 py-3 text-xs sm:text-sm text-center border-b border-amber-600 shadow-md flex flex-wrap items-center justify-center gap-2">
+          <i class="fa-solid fa-triangle-exclamation text-base text-slate-950"></i>
+          <span>You opened this directly as a local disk file (<code>file:///</code>). To use the full live database, click to open:</span>
+          <a href="http://localhost:3000" class="inline-flex items-center space-x-1.5 px-3 py-1 bg-white font-bold text-slate-900 rounded-lg shadow-xs hover:bg-slate-100 transition border border-amber-400">
+            <span>http://localhost:3000</span>
+            <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+          </a>
+        </div>
+      `);
+    }
+  </script>
+
+  <!-- ========================================================= -->
+  <!-- Top Global Institutional Header                          -->
+  <!-- ========================================================= -->
+  <header class="w-full bg-slate-900 text-white border-b border-slate-800 shadow-md sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div class="flex items-center space-x-3.5">
+        <div class="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-400/30 flex items-center justify-center text-blue-300 shrink-0">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222"/>
+          </svg>
+        </div>
+        <div>
+          <span class="font-bold text-base sm:text-lg tracking-tight block leading-tight">EBS DATA ENTRY SYSTEM</span>
+          <span class="text-xs text-slate-400 block">District Educational Office (Secondary) Marthandam</span>
+        </div>
+      </div>
+
+      <!-- Right Header Actions / Authenticated User Pill -->
+      <div class="flex items-center space-x-3 text-xs">
+        <!-- Unauthenticated badge -->
+        <div id="unauthHeaderBadge" class="flex items-center space-x-2 text-slate-300 bg-slate-800/80 px-3 py-1.5 rounded-full border border-slate-700/80">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>Official 138 Schools Registry</span>
+        </div>
+
+        <!-- Authenticated info (hidden initially) -->
+        <div id="authHeaderGroup" class="hidden flex flex-wrap items-center gap-2.5">
+          <span id="userRoleBadge" class="inline-flex items-center px-3 py-1.5 rounded-full font-semibold bg-indigo-950 text-indigo-200 border border-indigo-700/60">
+            <i class="fa-solid fa-user-shield mr-1.5"></i>
+            <span id="userRoleLabel">School</span>
+          </span>
+
+          <span id="schoolHeaderName" class="hidden max-w-xs truncate font-medium text-slate-300 bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700"></span>
+
+          <button type="button" onclick="handleLogout()" class="inline-flex items-center px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-rose-950/70 text-slate-300 hover:text-rose-200 border border-slate-700 hover:border-rose-800 transition cursor-pointer">
+            <i class="fa-solid fa-arrow-right-from-bracket mr-1.5"></i> Sign Out
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Global Toast Container -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Global Confirmation Modal -->
+  <div id="confirmModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 transform transition-all">
+      <div class="flex items-center space-x-3 text-rose-600 mb-3">
+        <div class="bg-rose-100 p-2.5 rounded-full">
+          <i class="fa-solid fa-triangle-exclamation text-lg"></i>
+        </div>
+        <h3 id="confirmModalTitle" class="text-lg font-bold text-slate-900">Confirm Action</h3>
+      </div>
+      <p id="confirmModalMessage" class="text-sm text-slate-600 mb-6">Are you sure you want to proceed?</p>
+      <div class="flex justify-end space-x-3">
+        <button type="button" id="confirmCancelBtn" class="px-4 py-2.5 rounded-xl text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 transition cursor-pointer">
+          Cancel
+        </button>
+        <button type="button" id="confirmProceedBtn" class="px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-rose-600 hover:bg-rose-700 shadow-sm transition cursor-pointer">
+          Confirm
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- VIEW 1: AUTHENTICATION (LOGIN) SECTION                   -->
+  <!-- ========================================================= -->
+  <section id="loginSection" class="flex-grow flex items-center justify-center px-4 py-8 sm:py-14">
+    <div class="w-full max-w-md">
+
+      <!-- Login Card -->
+      <div class="bg-white rounded-2xl shadow-xl shadow-slate-200/80 border border-slate-200/90 overflow-hidden">
+        
+        <!-- Header Banner -->
+        <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-blue-950 px-6 sm:px-8 py-6 text-white">
+          <div class="inline-flex items-center space-x-1.5 bg-white/10 backdrop-blur-sm px-2.5 py-1 rounded-md text-xs font-medium text-blue-200 mb-3">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+            </svg>
+            <span>Authorized District Portal Access</span>
+          </div>
+          <h1 class="text-xl sm:text-2xl font-bold tracking-tight">EBS DATA ENTRY LOGIN</h1>
+          <p class="text-slate-300 text-xs sm:text-sm mt-1">Select your access role to sign in to the database registry</p>
+        </div>
+
+        <!-- Role Selector Tab Bar -->
+        <div class="p-2 bg-slate-100 border-b border-slate-200/90 flex gap-2">
+          <button type="button" id="tabSchoolLogin" onclick="switchLoginTab('school')" class="flex-1 py-2 px-3 text-xs sm:text-sm font-semibold rounded-xl transition cursor-pointer text-center bg-white shadow-xs text-slate-900">
+            <i class="fa-solid fa-school mr-1.5 text-blue-700"></i> School User
+          </button>
+          <button type="button" id="tabAdminLogin" onclick="switchLoginTab('admin')" class="flex-1 py-2 px-3 text-xs sm:text-sm font-semibold rounded-xl transition cursor-pointer text-center text-slate-600 hover:text-slate-900">
+            <i class="fa-solid fa-shield-halved mr-1.5 text-indigo-700"></i> District Admin
+          </button>
+        </div>
+
+        <!-- Form Body -->
+        <div class="p-6 sm:p-8 space-y-5">
+          <!-- Error Alert Banner -->
+          <div id="loginErrorAlert" class="hidden rounded-xl bg-red-50 border border-red-200 p-3.5 text-xs sm:text-sm text-red-700 flex items-start space-x-2.5">
+            <svg class="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <div>
+              <p id="loginErrorTitle" class="font-semibold text-red-800">Authentication Failed</p>
+              <p id="loginErrorMessage" class="mt-0.5 text-red-600 leading-relaxed"></p>
+            </div>
+          </div>
+
+          <!-- SCHOOL LOGIN FORM -->
+          <form id="schoolLoginForm" class="space-y-4" novalidate>
+            <!-- UDISE Code Field -->
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <label for="schoolUdiseInput" class="block text-xs sm:text-sm font-semibold text-slate-700">
+                  UDISE Code (Username) <span class="text-rose-500">*</span>
+                </label>
+                <span id="schoolDigitCounter" class="text-[11px] font-mono text-slate-400">0 / 11 digits</span>
+              </div>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                  <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <input 
+                  type="text" 
+                  id="schoolUdiseInput" 
+                  name="udise"
+                  inputmode="numeric"
+                  maxlength="15"
+                  autocomplete="username"
+                  placeholder="e.g., 33300700117" 
+                  class="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-mono tracking-wide text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-600/30 focus:border-blue-700 transition"
+                  required
+                >
+                <div id="schoolMatchBadge" class="hidden absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none" title="Registered UDISE Code verified">
+                  <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                    <i class="fa-solid fa-check text-xs"></i>
+                  </span>
+                </div>
+              </div>
+              <!-- Live School Name Lookup Preview -->
+              <div id="schoolNamePreview" class="hidden mt-2 p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 font-medium flex items-center space-x-2">
+                <i class="fa-solid fa-circle-check text-emerald-600"></i>
+                <span id="schoolNamePreviewText" class="truncate"></span>
+              </div>
+            </div>
+
+            <!-- Password Field -->
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <label for="schoolPasswordInput" class="block text-xs sm:text-sm font-semibold text-slate-700">
+                  Password <span class="text-rose-500">*</span>
+                </label>
+                <span class="text-[11px] text-slate-400">Format: &lt;UDISE_Code&gt;@123</span>
+              </div>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                  <i class="fa-solid fa-lock"></i>
+                </div>
+                <input 
+                  type="password" 
+                  id="schoolPasswordInput" 
+                  name="password"
+                  autocomplete="current-password"
+                  placeholder="Enter institutional password" 
+                  class="w-full pl-10 pr-11 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-600/30 focus:border-blue-700 transition"
+                  required
+                >
+                <button 
+                  type="button" 
+                  onclick="togglePasswordVisibility('schoolPasswordInput', this)" 
+                  class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-700 focus:outline-none"
+                >
+                  <i class="fa-solid fa-eye text-sm"></i>
+                </button>
+              </div>
+            </div>
+
+            <button 
+              type="submit" 
+              id="schoolSubmitBtn"
+              class="w-full py-3 px-4 bg-slate-900 hover:bg-blue-950 active:scale-[0.99] text-white font-semibold text-sm rounded-xl shadow-md transition flex items-center justify-center space-x-2 cursor-pointer mt-2"
+            >
+              <span>Verify &amp; Enter School Portal</span>
+              <i class="fa-solid fa-arrow-right text-xs"></i>
+            </button>
+          </form>
+
+          <!-- ADMIN LOGIN FORM -->
+          <form id="adminLoginForm" class="hidden space-y-4" novalidate>
+            <!-- Admin Username -->
+            <div>
+              <label for="adminUsernameInput" class="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5">
+                Admin Username <span class="text-rose-500">*</span>
+              </label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                  <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <input 
+                  type="text" 
+                  id="adminUsernameInput" 
+                  name="username"
+                  autocomplete="username"
+                  placeholder="admin" 
+                  class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-indigo-600/30 focus:border-indigo-700 transition"
+                  required
+                >
+              </div>
+            </div>
+
+            <!-- Admin Password -->
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <label for="adminPasswordInput" class="block text-xs sm:text-sm font-semibold text-slate-700">
+                  Admin Password <span class="text-rose-500">*</span>
+                </label>
+                <span class="text-[11px] text-slate-400">Default: Admin@DEO2026</span>
+              </div>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                  <i class="fa-solid fa-key"></i>
+                </div>
+                <input 
+                  type="password" 
+                  id="adminPasswordInput" 
+                  name="password"
+                  autocomplete="current-password"
+                  placeholder="Enter administrator password" 
+                  class="w-full pl-10 pr-11 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-indigo-600/30 focus:border-indigo-700 transition"
+                  required
+                >
+                <button 
+                  type="button" 
+                  onclick="togglePasswordVisibility('adminPasswordInput', this)" 
+                  class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-700 focus:outline-none"
+                >
+                  <i class="fa-solid fa-eye text-sm"></i>
+                </button>
+              </div>
+            </div>
+
+            <button 
+              type="submit" 
+              id="adminSubmitBtn"
+              class="w-full py-3 px-4 bg-indigo-700 hover:bg-indigo-800 active:scale-[0.99] text-white font-semibold text-sm rounded-xl shadow-md transition flex items-center justify-center space-x-2 cursor-pointer mt-2"
+            >
+              <span>Sign In as District Administrator</span>
+              <i class="fa-solid fa-lock-open text-xs"></i>
+            </button>
+          </form>
+
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================= -->
+  <!-- VIEW 2: SCHOOL USER DASHBOARD                            -->
+  <!-- ========================================================= -->
+  <main id="schoolDashboard" class="hidden flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    
+    <!-- Institutional Welcome Banner -->
+    <div class="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 rounded-2xl shadow-lg p-6 sm:p-8 text-white flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div>
+        <div class="flex items-center space-x-2 mb-2">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+            <i class="fa-solid fa-circle-check mr-1.5 text-xs"></i> School Session Active
+          </span>
+          <span class="text-xs font-mono bg-white/10 px-2.5 py-0.5 rounded-md text-slate-300">
+            UDISE: <strong id="schoolBannerUdise" class="text-white"></strong>
+          </span>
+        </div>
+        <h2 id="schoolBannerName" class="text-xl sm:text-2xl font-bold tracking-tight text-white leading-tight"></h2>
+        <p class="text-xs sm:text-sm text-slate-300 mt-1">Teacher Information & Service Registry &bull; Database Synchronized</p>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="bg-white/10 backdrop-blur-xs border border-white/10 rounded-xl px-4 py-3 text-center min-w-[120px]">
+          <span class="block text-2xl font-bold text-white" id="schoolTeacherCount">0</span>
+          <span class="block text-[11px] uppercase tracking-wider text-slate-300 font-medium">Teachers Saved</span>
+        </div>
+        <button type="button" onclick="exportCurrentSchoolEbs()" class="px-4 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-semibold rounded-xl shadow-md transition cursor-pointer flex items-center space-x-2" title="Download official DEO EBS 2026-27 filled workbook">
+          <i class="fa-solid fa-file-excel text-base"></i>
+          <span>Official EBS (.xlsx)</span>
+        </button>
+        <button type="button" onclick="exportSchoolCSV()" class="px-3 py-3 bg-slate-700 hover:bg-slate-600 text-white text-xs sm:text-sm font-semibold rounded-xl shadow-md transition cursor-pointer flex items-center space-x-1.5" title="Export as CSV table">
+          <i class="fa-solid fa-file-csv text-base"></i>
+          <span>CSV</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Edit Mode Banner -->
+    <div id="schoolEditModeBanner" class="hidden bg-amber-50 border-l-4 border-amber-500 p-4 rounded-xl shadow-xs flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <i class="fa-solid fa-pen-to-square text-amber-600 text-lg"></i>
+        <div>
+          <p class="text-sm font-semibold text-amber-900">Editing Teacher Record</p>
+          <p class="text-xs text-amber-700">Update the fields below and click "Update Record" to save changes to the database.</p>
+        </div>
+      </div>
+      <button type="button" onclick="cancelSchoolEdit()" class="px-3 py-1.5 bg-amber-200/80 hover:bg-amber-300 text-amber-900 text-xs font-semibold rounded-lg transition cursor-pointer">
+        Cancel Edit
+      </button>
+    </div>
+
+    <!-- 4-SECTION TEACHER DATA ENTRY FORM -->
+    <form id="schoolTeacherForm" class="space-y-6" novalidate>
+      <input type="hidden" id="schoolEditRecordId" value="">
+
+      <!-- SECTION 1: SCHOOL DETAILS -->
+      <section class="bg-white rounded-2xl shadow-xs border border-slate-200/80 overflow-hidden">
+        <div class="bg-slate-50/80 border-b border-slate-200/80 px-6 py-4 flex items-center space-x-2.5">
+          <span class="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold">1</span>
+          <h2 class="text-base font-bold text-slate-800 uppercase tracking-wider">School Details</h2>
+        </div>
+        <div class="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <!-- 1. Sl No -->
+          <div>
+            <label for="schoolSlNo" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
+              Sl No <span class="text-rose-500">*</span>
+            </label>
+            <input type="number" id="schoolSlNo" name="slNo" min="1" required placeholder="1"
+              class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition">
+          </div>
+
+          <!-- 2. UDISE CODE (LOCKED TO LOGGED IN SCHOOL) -->
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label for="schoolFormUdise" class="block text-xs font-bold text-slate-700 uppercase tracking-wide">
+                UDISE CODE <span class="text-rose-500">*</span>
+              </label>
+              <span class="text-[10px] uppercase font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">Locked</span>
+            </div>
+            <div class="relative">
+              <input type="text" id="schoolFormUdise" name="udiseCode" readonly required
+                class="w-full rounded-xl border border-slate-200 bg-slate-100/80 px-3.5 py-2.5 text-sm text-slate-700 font-mono font-semibold cursor-not-allowed outline-none">
+              <i class="fa-solid fa-lock absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+            </div>
+          </div>
+
+          <!-- 3. SCHOOL NAME (LOCKED TO LOGGED IN SCHOOL) -->
+          <div class="sm:col-span-2">
+            <div class="flex items-center justify-between mb-1.5">
+              <label for="schoolFormName" class="block text-xs font-bold text-slate-700 uppercase tracking-wide">
+                SCHOOL NAME <span class="text-rose-500">*</span>
+              </label>
+              <span class="text-[10px] uppercase font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">Locked</span>
+            </div>
+            <input type="text" id="schoolFormName" name="schoolName" readonly required
+              class="w-full rounded-xl border border-slate-200 bg-slate-100/80 px-3.5 py-2.5 text-sm text-slate-700 font-semibold cursor-not-allowed outline-none">
+          </div>
+
+          <!-- 4. SCHOOL TYPE -->
+          <div class="sm:col-span-2 lg:col-span-4">
+            <label for="schoolFormType" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
+              SCHOOL TYPE <span class="text-rose-500">*</span>
+            </label>
+            <select id="schoolFormType" name="schoolType" required onchange="updateAppointmentHighlight('schoolFormType', 'schoolAppointmentNatureWrapper', 'schoolAidedBadge', 'schoolAppointmentNature')"
+              class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition">
+              <option value="" disabled selected>-- Select School Type --</option>
+              <option value="GOVERNMENT">GOVERNMENT</option>
+              <option value="FULLY AIDED">FULLY AIDED</option>
+              <option value="PARTIALLY AIDED">PARTIALLY AIDED</option>
+              <option value="SELF FINANCE">SELF FINANCE</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 2: TEACHER PERSONAL & SERVICE DETAILS -->
+      <section class="bg-white rounded-2xl shadow-xs border border-slate-200/80 overflow-hidden">
+        <div class="bg-slate-50/80 border-b border-slate-200/80 px-6 py-4 flex items-center space-x-2.5">
+          <span class="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold">2</span>
+          <h2 class="text-base font-bold text-slate-800 uppercase tracking-wider">Teacher Personal & Service Details</h2>
+        </div>
+        <div class="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <!-- 5. NAME OF THE TEACHER -->
+          <div class="sm:col-span-2 lg:col-span-1">
+            <label for="schoolTeacherName" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
+              NAME OF THE TEACHER <span class="text-rose-500">*</span>
+            </label>
+            <input type="text" id="schoolTeacherName" name="teacherName" required placeholder="Enter full name with initials"
+              class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition">
+          </div>
+
+          <!-- 6. SEX -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
+              SEX <span class="text-rose-500">*</span>
+            </label>
+            <div class="grid grid-cols-3 gap-2 pt-0.5">
+              <label class="cursor-pointer">
+                <input type="radio" name="schoolSex" value="Male" required class="peer sr-only">
+                <div class="text-center py-2.5 px-2 rounded-xl border border-slate-300 text-xs font-semibold text-slate-700 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600 hover:bg-slate-50 transition">
+                  Male
+                </div>
+              </label>
+              <label class="cursor-pointer">
+                <input type="radio" name="schoolSex" value="Female" required class="peer sr-only">
+                <div class="text-center py-2.5 px-2 rounded-xl border border-slate-300 text-xs font-semibold text-slate-700 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600 hover:bg-slate-50 transition">
+                  Female
+                </div>
+              </label>
+              <label class="cursor-pointer">
+                <input type="radio" name="schoolSex" value="Others" required class="peer sr-only">
+                <div class="text-center py-2.5 px-2 rounded-xl border border-slate-300 text-xs font-semibold text-slate-700 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600 hover:bg-slate-50 transition">
+                  Others
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- 7. DESIGNATION -->
+          <div>
+            <label for="schoolDesignation" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
+              DESIGNATION <span class="text-rose-500">*</span>
+            </label>
+            <select id="schoolDesignation" name="designation" required
+              class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition">
+              <option value="" disabled selected>-- Select Designation --</option>
+              <option value="HSS HM">HSS HM</option>
+              <option value="HS HM">HS HM</option>
+              <option value="PG. ASST.">PG. ASST.</option>
+              <option value="PHYSICAL DIRECTOR">PHYSICAL DIRECTOR</option>
+              <option value="VOCATIONAL INSTRUCTOR">VOCATIONAL INSTRUCTOR</option>
+              <option value="COMPUTER INSTRUCTOR">COMPUTER INSTRUCTOR</option>
+            </select>
+          </div>
+
+          <!-- 8. EDUCATIONAL QUALIFICATION -->
+          <div class="sm:col-span-2 lg:col-span-3">
+            <label for="schoolQualification" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
+              EDUCATIONAL QUALIFICATION <span class="text-rose-500">*</span>
+            </label>
+            <input type="text" id="schoolQualification" name="qualification" required placeholder="e.g., M.Sc., B.Ed., M.Phil."
+              class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition">
+          </div>
+
+          <!-- 12. DATE OF BIRTH -->
+          <div>
+            <label for="schoolDob" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
+              DATE OF BIRTH <span class="text-rose-500">*</span>
+            </label>
+            <input type="date" id="schoolDob" name="dob" required
+              class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition">
+          </div>
+
+          <!-- 13. DATE OF APPOINTMENT IN PRESENT POST -->
+          <div>
+            <label for="schoolDateOfAppointment" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
+              APPOINTMENT IN PRESENT POST <span class="text-rose-500">*</span>
+            </label>
+            <input type="date" id="schoolDateOfAppointment" name="dateOfAppointment" required
+              class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition">
+          </div>
+
+          <!-- 14. DATE OF RETIREMENT -->
+          <div>
+            <label for="schoolDateOfRetirement" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
+              DATE OF RETIREMENT <span class="text-rose-500">*</span>
+            </label>
+            <input type="date" id="schoolDateOfRetirement" name="dateOfRetirement" required
+              class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition">
+          </div>
+
+          <!-- 15. APPOINTMENT NATURE (FOR AIDED SCHOOLS ONLY) -->
+          <div id="schoolAppointmentNatureWrapper" class="sm:col-span-2 lg:col-span-3 rounded-xl p-3 -mx-3 transition-colors duration-200">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+              <label for="schoolAppointmentNature" class="block text-xs font-bold text-slate-700 uppercase tracking-wide">
+                APPOINTMENT NATURE <span class="text-slate-400 font-normal">(FOR AIDED SCHOOLS ONLY)</span>
+              </label>
+              <span id="schoolAidedBadge" class="hidden inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-indigo-100 text-indigo-700">
+                <i class="fa-solid fa-circle-info mr-1"></i> Aided School Selected
+              </span>
+            </div>
+            <select id="schoolAppointmentNature" name="appointmentNature"
+              class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition">
+              <option value="" selected>-- Select Appointment Nature --</option>
+              <option value="Approver">Approver</option>
+              <option value="Un-Approved">Un-Approved</option>
+              <option value="Self-Finance">Self-Finance</option>
+              <option value="Part-Time">Part-Time</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 3: SUBJECT & TEACHING DETAILS -->
+      <section class="bg-white rounded-2xl shadow-xs border border-slate-200/80 overflow-hidden">
+        <div class="bg-slate-50/80 border-b border-slate-200/80 px-6 py-4 flex items-center space-x-2.5">
+          <span class="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold">3</span>
+          <h2 class="text-base font-bold text-slate-800 uppercase tracking-wider">Subject & Teaching Details</h2>
+        </div>
+        <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-5">
+          <!-- 9. MAIN SUBJECT TEACHING -->
+          <div>
+            <label for="schoolMainSubject" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
+              MAIN SUBJECT TEACHING <span class="text-rose-500">*</span>
+            </label>
+            <select id="schoolMainSubject" name="mainSubject" required
+              class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition subject-select-main">
+              <!-- Populated by script -->
+            </select>
+          </div>
+
+          <!-- 10. OTHER SUBJECT TEACHING -->
+          <div>
+            <label for="schoolOtherSubject" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
+              OTHER SUBJECT TEACHING <span class="text-rose-500">*</span>
+            </label>
+            <select id="schoolOtherSubject" name="otherSubject" required
+              class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition subject-select-other">
+              <!-- Populated by script -->
+            </select>
+          </div>
+
+          <!-- 11. MEDIUM OF TEACHING -->
+          <div>
+            <label for="schoolMediumOfTeaching" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
+              MEDIUM OF TEACHING <span class="text-rose-500">*</span>
+            </label>
+            <select id="schoolMediumOfTeaching" name="mediumOfTeaching" required
+              class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition">
+              <option value="" disabled selected>-- Select Medium --</option>
+              <option value="Tamil">Tamil</option>
+              <option value="English">English</option>
+              <option value="Malayalam">Malayalam</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 4: CONTACT DETAILS & REMARKS -->
+      <section class="bg-white rounded-2xl shadow-xs border border-slate-200/80 overflow-hidden">
+        <div class="bg-slate-50/80 border-b border-slate-200/80 px-6 py-4 flex items-center space-x-2.5">
+          <span class="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold">4</span>
+          <h2 class="text-base font-bold text-slate-800 uppercase tracking-wider">Contact Details & Remarks</h2>
+        </div>
+        <div class="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <!-- 17. AREA -->
+          <div>
+            <label for="schoolArea" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
+              AREA <span class="text-rose-500">*</span>
+            </label>
+            <input type="text" id="schoolArea" name="area" required placeholder="e.g., Rural / Urban / Block Name"
+              class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition">
+          </div>
+
+          <!-- 18. E-Mail ID -->
+          <div>
+            <label for="schoolEmailId" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
+              E-Mail ID <span class="text-rose-500">*</span>
+            </label>
+            <input type="email" id="schoolEmailId" name="emailId" required placeholder="teacher@example.com"
+              class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition">
+          </div>
+
+          <!-- 19. MOBILE NO -->
+          <div>
+            <label for="schoolMobileNo" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
+              MOBILE NO <span class="text-rose-500">*</span>
+            </label>
+            <input type="tel" id="schoolMobileNo" name="mobileNo" maxlength="10" pattern="[6-9]\d{9}" required placeholder="10-digit Mobile Number"
+              class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 font-mono focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition">
+          </div>
+
+          <!-- 16. ADDRESS with PINCODE -->
+          <div class="sm:col-span-2">
+            <label for="schoolAddress" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
+              ADDRESS with PINCODE <span class="text-rose-500">*</span>
+            </label>
+            <textarea id="schoolAddress" name="address" rows="3" required placeholder="Door No, Street, Village/Town, District - PINCODE"
+              class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition"></textarea>
+          </div>
+
+          <!-- 20. Remarks -->
+          <div class="sm:col-span-2 lg:col-span-1">
+            <label for="schoolRemarks" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
+              Remarks
+            </label>
+            <textarea id="schoolRemarks" name="remarks" rows="3" placeholder="Optional notes"
+              class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition"></textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- Action Bar -->
+      <div class="flex flex-col sm:flex-row items-center justify-end gap-3 pt-2">
+        <button type="button" onclick="confirmResetSchoolForm()" class="w-full sm:w-auto px-5 py-3 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 text-sm font-semibold transition cursor-pointer flex items-center justify-center">
+          <i class="fa-solid fa-rotate-left mr-2"></i> Clear Form
+        </button>
+        <button type="submit" id="schoolSubmitRecordBtn" class="w-full sm:w-auto px-7 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold shadow-md transition cursor-pointer flex items-center justify-center">
+          <i class="fa-solid fa-plus-circle mr-2"></i> <span id="schoolSubmitBtnText">Save Teacher Record</span>
+        </button>
+      </div>
+    </form>
+
+    <!-- LIVE DATABASE RECORDS TABLE (CURRENT SCHOOL) -->
+    <section class="bg-white rounded-2xl shadow-xs border border-slate-200/80 overflow-hidden">
+      <div class="bg-slate-50/80 border-b border-slate-200/80 px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h2 class="text-base font-bold text-slate-800 uppercase tracking-wider flex items-center">
+            <i class="fa-solid fa-table-list text-indigo-600 mr-2"></i> School Teacher Records
+          </h2>
+          <p class="text-xs text-slate-500 mt-0.5">Records saved securely in the district database.</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+            <input type="text" id="schoolSearchInput" onkeyup="renderSchoolTable()" placeholder="Search name, subject, designation..."
+              class="w-full sm:w-64 pl-8 pr-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none">
+          </div>
+        </div>
+      </div>
+
+      <div class="table-container overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-200 text-left text-xs">
+          <thead class="bg-slate-100/80 text-slate-600 font-bold uppercase tracking-wider whitespace-nowrap">
+            <tr>
+              <th class="px-4 py-3.5 sticky left-0 bg-slate-100 z-10 border-r border-slate-200">Actions</th>
+              <th class="px-4 py-3.5">Sl No</th>
+              <th class="px-4 py-3.5">UDISE CODE</th>
+              <th class="px-4 py-3.5">SCHOOL NAME</th>
+              <th class="px-4 py-3.5">SCHOOL TYPE</th>
+              <th class="px-4 py-3.5">TEACHER NAME</th>
+              <th class="px-4 py-3.5">SEX</th>
+              <th class="px-4 py-3.5">DESIGNATION</th>
+              <th class="px-4 py-3.5">QUALIFICATION</th>
+              <th class="px-4 py-3.5">MAIN SUBJECT</th>
+              <th class="px-4 py-3.5">OTHER SUBJECT</th>
+              <th class="px-4 py-3.5">MEDIUM</th>
+              <th class="px-4 py-3.5">DOB</th>
+              <th class="px-4 py-3.5">APPOINTMENT DATE</th>
+              <th class="px-4 py-3.5">RETIREMENT DATE</th>
+              <th class="px-4 py-3.5">APPOINTMENT NATURE</th>
+              <th class="px-4 py-3.5">ADDRESS</th>
+              <th class="px-4 py-3.5">AREA</th>
+              <th class="px-4 py-3.5">EMAIL</th>
+              <th class="px-4 py-3.5">MOBILE NO</th>
+              <th class="px-4 py-3.5">REMARKS</th>
+            </tr>
+          </thead>
+          <tbody id="schoolRecordsTableBody" class="divide-y divide-slate-200 bg-white whitespace-nowrap">
+            <!-- Populated dynamically -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Empty State -->
+      <div id="schoolEmptyState" class="py-12 px-4 text-center">
+        <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 mb-3">
+          <i class="fa-regular fa-folder-open text-xl"></i>
+        </div>
+        <h3 class="text-sm font-semibold text-slate-800">No Teacher Records Found</h3>
+        <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">Fill out the form above to add teacher entries to your institutional database registry.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================= -->
+  <!-- VIEW 3: DISTRICT MASTER ADMIN DASHBOARD                  -->
+  <!-- ========================================================= -->
+  <main id="adminDashboard" class="hidden flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+    <!-- Admin Hero Banner -->
+    <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-2xl shadow-lg p-6 sm:p-8 text-white flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div>
+        <div class="flex items-center space-x-2 mb-2">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/30 text-indigo-200 border border-indigo-400/30">
+            <i class="fa-solid fa-crown mr-1.5 text-xs text-amber-300"></i> Master Administrator Session
+          </span>
+          <span class="text-xs bg-white/10 px-2.5 py-0.5 rounded-md text-slate-300">
+            Full District Control &bull; 138 Schools
+          </span>
+        </div>
+        <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-white leading-tight">District Master Management Console</h2>
+        <p class="text-xs sm:text-sm text-slate-300 mt-1">Real-time overview, multi-school data control, submissions audit, and master exports</p>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3">
+        <button type="button" onclick="openAdminAddTeacherModal()" class="px-4 py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-semibold rounded-xl shadow-md transition cursor-pointer flex items-center space-x-2">
+          <i class="fa-solid fa-user-plus text-sm"></i>
+          <span>Add Teacher for School</span>
+        </button>
+        <button type="button" onclick="openEbsExportModal()" class="px-4 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-semibold rounded-xl shadow-md transition cursor-pointer flex items-center space-x-2">
+          <i class="fa-solid fa-file-excel text-base"></i>
+          <span>Export Official EBS Reports</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Administrative KPI Metric Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <!-- KPI 1: Total Schools -->
+      <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs flex items-center justify-between">
+        <div>
+          <span class="text-xs uppercase font-bold tracking-wider text-slate-400">Total Schools</span>
+          <span class="block text-2xl font-extrabold text-slate-900 mt-1" id="kpiTotalSchools">138</span>
+          <span class="text-[11px] text-slate-500 mt-0.5 block">DEO Marthandam Registry</span>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl shrink-0">
+          <i class="fa-solid fa-school"></i>
+        </div>
+      </div>
+
+      <!-- KPI 2: Schools Submitted -->
+      <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs flex items-center justify-between">
+        <div>
+          <span class="text-xs uppercase font-bold tracking-wider text-slate-400">Schools Submitted</span>
+          <div class="flex items-baseline space-x-1 mt-1">
+            <span class="text-2xl font-extrabold text-emerald-600" id="kpiSubmittedSchools">0</span>
+            <span class="text-xs text-slate-400">/ 138</span>
+          </div>
+          <span class="text-[11px] text-slate-500 mt-0.5 block" id="kpiPendingSchools">138 pending</span>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shrink-0">
+          <i class="fa-solid fa-clipboard-check"></i>
+        </div>
+      </div>
+
+      <!-- KPI 3: Total Teachers -->
+      <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs flex items-center justify-between">
+        <div>
+          <span class="text-xs uppercase font-bold tracking-wider text-slate-400">Total Teachers</span>
+          <span class="block text-2xl font-extrabold text-indigo-600 mt-1" id="kpiTotalTeachers">0</span>
+          <span class="text-[11px] text-slate-500 mt-0.5 block">Across all institutions</span>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl shrink-0">
+          <i class="fa-solid fa-chalkboard-user"></i>
+        </div>
+      </div>
+
+      <!-- KPI 4: Government vs Aided Breakdown -->
+      <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs flex items-center justify-between">
+        <div>
+          <span class="text-xs uppercase font-bold tracking-wider text-slate-400">Govt / Aided Staff</span>
+          <div class="flex items-center space-x-2 mt-1">
+            <span class="text-sm font-bold text-slate-800">Govt: <span id="kpiGovtCount" class="text-indigo-600">0</span></span>
+            <span class="text-slate-300">|</span>
+            <span class="text-sm font-bold text-slate-800">Aided: <span id="kpiAidedCount" class="text-emerald-600">0</span></span>
+          </div>
+          <span class="text-[11px] text-slate-500 mt-0.5 block" id="kpiOtherTypeCount">Self-Finance: 0</span>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl shrink-0">
+          <i class="fa-solid fa-chart-pie"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Admin Master Tabs (All Records vs School Submission Status) -->
+    <div class="flex border-b border-slate-200 gap-4">
+      <button type="button" id="adminTabRecordsBtn" onclick="switchAdminSubTab('records')" class="pb-3 text-sm font-bold text-indigo-700 border-b-2 border-indigo-600 transition flex items-center space-x-2">
+        <i class="fa-solid fa-table-list"></i>
+        <span>All Teacher Records (<span id="adminRecordsTabCount">0</span>)</span>
+      </button>
+      <button type="button" id="adminTabStatusBtn" onclick="switchAdminSubTab('status')" class="pb-3 text-sm font-semibold text-slate-500 hover:text-slate-800 border-b-2 border-transparent transition flex items-center space-x-2">
+        <i class="fa-solid fa-list-check"></i>
+        <span>138 Schools Submission Status</span>
+      </button>
+    </div>
+
+    <!-- SUB-TAB 1: ALL TEACHER RECORDS VIEW -->
+    <div id="adminRecordsSubTab" class="space-y-6">
+      
+      <!-- Filter Toolbar -->
+      <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs space-y-4">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center">
+            <i class="fa-solid fa-filter text-indigo-600 mr-1.5"></i> Comprehensive Database Filters
+          </span>
+          <button type="button" onclick="resetAdminFilters()" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition">
+            Reset All Filters
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+          <!-- Filter by School -->
+          <div class="sm:col-span-2">
+            <label class="block font-semibold text-slate-600 mb-1">Filter By School</label>
+            <select id="adminFilterSchool" onchange="loadAdminTeachers()" class="w-full rounded-xl border border-slate-300 p-2.5 outline-none bg-slate-50 focus:bg-white focus:border-indigo-500">
+              <option value="ALL">All 138 District Schools</option>
+              <!-- Filled dynamically with 138 schools -->
+            </select>
+          </div>
+
+          <!-- Filter by School Type -->
+          <div>
+            <label class="block font-semibold text-slate-600 mb-1">School Type</label>
+            <select id="adminFilterSchoolType" onchange="loadAdminTeachers()" class="w-full rounded-xl border border-slate-300 p-2.5 outline-none bg-slate-50 focus:bg-white focus:border-indigo-500">
+              <option value="">All School Types</option>
+              <option value="GOVERNMENT">GOVERNMENT</option>
+              <option value="FULLY AIDED">FULLY AIDED</option>
+              <option value="PARTIALLY AIDED">PARTIALLY AIDED</option>
+              <option value="SELF FINANCE">SELF FINANCE</option>
+            </select>
+          </div>
+
+          <!-- Filter by Designation -->
+          <div>
+            <label class="block font-semibold text-slate-600 mb-1">Designation</label>
+            <select id="adminFilterDesignation" onchange="loadAdminTeachers()" class="w-full rounded-xl border border-slate-300 p-2.5 outline-none bg-slate-50 focus:bg-white focus:border-indigo-500">
+              <option value="">All Designations</option>
+              <option value="HSS HM">HSS HM</option>
+              <option value="HS HM">HS HM</option>
+              <option value="PG. ASST.">PG. ASST.</option>
+              <option value="PHYSICAL DIRECTOR">PHYSICAL DIRECTOR</option>
+              <option value="VOCATIONAL INSTRUCTOR">VOCATIONAL INSTRUCTOR</option>
+              <option value="COMPUTER INSTRUCTOR">COMPUTER INSTRUCTOR</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="relative">
+          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+          <input type="text" id="adminSearchInput" onkeyup="loadAdminTeachersDebounced()" placeholder="Search across all schools by teacher name, UDISE, school, subject, phone..."
+            class="w-full pl-9 pr-4 py-2.5 text-xs rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition">
+        </div>
+      </div>
+
+      <!-- Master Records Table -->
+      <section class="bg-white rounded-2xl shadow-xs border border-slate-200/80 overflow-hidden">
+        <div class="bg-slate-50/80 border-b border-slate-200/80 px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider">Master Registry Database Records</h3>
+            <p class="text-xs text-slate-500 mt-0.5">Showing <span id="adminRecordsLoadedCount" class="font-bold text-slate-800">0</span> matching entries</p>
+          </div>
+          <button type="button" onclick="exportAdminMasterCSV()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-xl shadow-xs transition cursor-pointer flex items-center space-x-1.5 self-start sm:self-auto">
+            <i class="fa-solid fa-file-csv"></i>
+            <span>Export View to CSV</span>
+          </button>
+        </div>
+
+        <div class="table-container overflow-x-auto">
+          <table class="min-w-full divide-y divide-slate-200 text-left text-xs">
+            <thead class="bg-slate-100/80 text-slate-600 font-bold uppercase tracking-wider whitespace-nowrap">
+              <tr>
+                <th class="px-4 py-3.5 sticky left-0 bg-slate-100 z-10 border-r border-slate-200">Actions</th>
+                <th class="px-4 py-3.5">Sl No</th>
+                <th class="px-4 py-3.5">UDISE CODE</th>
+                <th class="px-4 py-3.5">SCHOOL NAME</th>
+                <th class="px-4 py-3.5">SCHOOL TYPE</th>
+                <th class="px-4 py-3.5">TEACHER NAME</th>
+                <th class="px-4 py-3.5">SEX</th>
+                <th class="px-4 py-3.5">DESIGNATION</th>
+                <th class="px-4 py-3.5">QUALIFICATION</th>
+                <th class="px-4 py-3.5">MAIN SUBJECT</th>
+                <th class="px-4 py-3.5">OTHER SUBJECT</th>
+                <th class="px-4 py-3.5">MEDIUM</th>
+                <th class="px-4 py-3.5">DOB</th>
+                <th class="px-4 py-3.5">APPOINTMENT DATE</th>
+                <th class="px-4 py-3.5">RETIREMENT DATE</th>
+                <th class="px-4 py-3.5">APPOINTMENT NATURE</th>
+                <th class="px-4 py-3.5">ADDRESS</th>
+                <th class="px-4 py-3.5">AREA</th>
+                <th class="px-4 py-3.5">EMAIL</th>
+                <th class="px-4 py-3.5">MOBILE NO</th>
+                <th class="px-4 py-3.5">REMARKS</th>
+              </tr>
+            </thead>
+            <tbody id="adminRecordsTableBody" class="divide-y divide-slate-200 bg-white whitespace-nowrap">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+
+        <div id="adminEmptyState" class="py-12 px-4 text-center">
+          <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 mb-3">
+            <i class="fa-regular fa-folder-open text-xl"></i>
+          </div>
+          <h4 class="text-sm font-semibold text-slate-800">No Matching Teacher Records</h4>
+          <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">No teacher records match your current filter parameters or no submissions have been made yet.</p>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- SUB-TAB 2: 138 SCHOOLS SUBMISSION STATUS VIEW -->
+    <div id="adminStatusSubTab" class="hidden space-y-6">
+      <section class="bg-white rounded-2xl shadow-xs border border-slate-200/80 overflow-hidden">
+        <div class="bg-slate-50/80 border-b border-slate-200/80 px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider">Institutional Submission Directory</h3>
+            <p class="text-xs text-slate-500 mt-0.5">Real-time status of all 138 schools registered under DEO Marthandam</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="relative">
+              <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+              <input type="text" id="adminStatusSearch" onkeyup="renderAdminStatusTable()" placeholder="Find school or UDISE..."
+                class="w-full sm:w-60 pl-8 pr-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none">
+            </div>
+            <button type="button" onclick="exportSchoolStatusCSV()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold rounded-xl shadow-xs transition cursor-pointer flex items-center space-x-1.5">
+              <i class="fa-solid fa-file-csv"></i>
+              <span>Export Audit CSV</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="table-container overflow-x-auto max-h-[600px]">
+          <table class="min-w-full divide-y divide-slate-200 text-left text-xs">
+            <thead class="bg-slate-100/90 text-slate-600 font-bold uppercase tracking-wider sticky top-0 z-20">
+              <tr>
+                <th class="px-4 py-3.5">#</th>
+                <th class="px-4 py-3.5">UDISE Code</th>
+                <th class="px-4 py-3.5">School Name</th>
+                <th class="px-4 py-3.5 text-center">Teachers Saved</th>
+                <th class="px-4 py-3.5">Submission Status</th>
+                <th class="px-4 py-3.5 text-right">Quick Action</th>
+              </tr>
+            </thead>
+            <tbody id="adminStatusTableBody" class="divide-y divide-slate-200 bg-white">
+              <!-- Populated dynamically with all 138 schools -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+  </main>
+
+  <!-- ========================================================= -->
+  <!-- MODAL: ADMIN ADD / EDIT TEACHER MODAL                    -->
+  <!-- ========================================================= -->
+  <div id="adminTeacherModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl max-w-4xl w-full my-8 p-6 sm:p-8 shadow-2xl border border-slate-100 transform transition-all max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-200 mb-6">
+        <div>
+          <h3 id="adminModalTitle" class="text-lg font-bold text-slate-900">Add Teacher Record (Admin Console)</h3>
+          <p class="text-xs text-slate-500 mt-0.5">District Admin can add or modify teacher records for any institution.</p>
+        </div>
+        <button type="button" onclick="closeAdminTeacherModal()" class="text-slate-400 hover:text-slate-700 p-2 rounded-lg transition">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <form id="adminTeacherForm" class="space-y-6" novalidate>
+        <input type="hidden" id="adminModalRecordId" value="">
+
+        <!-- School Selection -->
+        <div class="bg-indigo-50/60 p-4 rounded-xl border border-indigo-100 space-y-4">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-indigo-950">Target School Assignment</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="adminModalSchoolSelect" class="block text-xs font-bold text-slate-700 uppercase mb-1">
+                Select School from Directory <span class="text-rose-500">*</span>
+              </label>
+              <select id="adminModalSchoolSelect" required onchange="handleAdminModalSchoolChange()" class="w-full rounded-xl border border-slate-300 p-2.5 text-xs bg-white outline-none focus:border-indigo-500">
+                <option value="" disabled selected>-- Select School --</option>
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+            <div>
+              <label for="adminModalUdise" class="block text-xs font-bold text-slate-700 uppercase mb-1">
+                UDISE Code <span class="text-rose-500">*</span>
+              </label>
+              <input type="text" id="adminModalUdise" readonly required class="w-full rounded-xl border border-slate-200 bg-slate-100 p-2.5 text-xs font-mono font-semibold text-slate-800 cursor-not-allowed">
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 1 details: Sl No, Type -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label for="adminModalSlNo" class="block text-xs font-bold text-slate-700 uppercase mb-1">
+              Sl No <span class="text-rose-500">*</span>
+            </label>
+            <input type="number" id="adminModalSlNo" required placeholder="1" class="w-full rounded-xl border border-slate-300 p-2.5 text-xs outline-none focus:border-indigo-500">
+          </div>
+          <div>
+            <label for="adminModalSchoolType" class="block text-xs font-bold text-slate-700 uppercase mb-1">
+              School Type <span class="text-rose-500">*</span>
+            </label>
+            <select id="adminModalSchoolType" required onchange="updateAppointmentHighlight('adminModalSchoolType', 'adminModalAppointmentWrapper', 'adminModalAidedBadge', 'adminModalAppointmentNature')" class="w-full rounded-xl border border-slate-300 p-2.5 text-xs outline-none focus:border-indigo-500">
+              <option value="GOVERNMENT">GOVERNMENT</option>
+              <option value="FULLY AIDED">FULLY AIDED</option>
+              <option value="PARTIALLY AIDED">PARTIALLY AIDED</option>
+              <option value="SELF FINANCE">SELF FINANCE</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Teacher details -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label for="adminModalTeacherName" class="block text-xs font-bold text-slate-700 uppercase mb-1">
+              Teacher Name <span class="text-rose-500">*</span>
+            </label>
+            <input type="text" id="adminModalTeacherName" required placeholder="Full Name" class="w-full rounded-xl border border-slate-300 p-2.5 text-xs outline-none focus:border-indigo-500">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Sex <span class="text-rose-500">*</span></label>
+            <select id="adminModalSex" required class="w-full rounded-xl border border-slate-300 p-2.5 text-xs outline-none focus:border-indigo-500">
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Others">Others</option>
+            </select>
+          </div>
+          <div>
+            <label for="adminModalDesignation" class="block text-xs font-bold text-slate-700 uppercase mb-1">
+              Designation <span class="text-rose-500">*</span>
+            </label>
+            <select id="adminModalDesignation" required class="w-full rounded-xl border border-slate-300 p-2.5 text-xs outline-none focus:border-indigo-500">
+              <option value="HSS HM">HSS HM</option>
+              <option value="HS HM">HS HM</option>
+              <option value="PG. ASST.">PG. ASST.</option>
+              <option value="PHYSICAL DIRECTOR">PHYSICAL DIRECTOR</option>
+              <option value="VOCATIONAL INSTRUCTOR">VOCATIONAL INSTRUCTOR</option>
+              <option value="COMPUTER INSTRUCTOR">COMPUTER INSTRUCTOR</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label for="adminModalQualification" class="block text-xs font-bold text-slate-700 uppercase mb-1">
+            Qualification <span class="text-rose-500">*</span>
+          </label>
+          <input type="text" id="adminModalQualification" required placeholder="e.g. M.Sc., B.Ed." class="w-full rounded-xl border border-slate-300 p-2.5 text-xs outline-none focus:border-indigo-500">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label for="adminModalMainSubject" class="block text-xs font-bold text-slate-700 uppercase mb-1">Main Subject <span class="text-rose-500">*</span></label>
+            <select id="adminModalMainSubject" required class="w-full rounded-xl border border-slate-300 p-2.5 text-xs outline-none focus:border-indigo-500 subject-select-main"></select>
+          </div>
+          <div>
+            <label for="adminModalOtherSubject" class="block text-xs font-bold text-slate-700 uppercase mb-1">Other Subject <span class="text-rose-500">*</span></label>
+            <select id="adminModalOtherSubject" required class="w-full rounded-xl border border-slate-300 p-2.5 text-xs outline-none focus:border-indigo-500 subject-select-other"></select>
+          </div>
+          <div>
+            <label for="adminModalMedium" class="block text-xs font-bold text-slate-700 uppercase mb-1">Medium <span class="text-rose-500">*</span></label>
+            <select id="adminModalMedium" required class="w-full rounded-xl border border-slate-300 p-2.5 text-xs outline-none focus:border-indigo-500">
+              <option value="Tamil">Tamil</option>
+              <option value="English">English</option>
+              <option value="Malayalam">Malayalam</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label for="adminModalDob" class="block text-xs font-bold text-slate-700 uppercase mb-1">Date of Birth <span class="text-rose-500">*</span></label>
+            <input type="date" id="adminModalDob" required class="w-full rounded-xl border border-slate-300 p-2.5 text-xs outline-none focus:border-indigo-500">
+          </div>
+          <div>
+            <label for="adminModalDateAppointment" class="block text-xs font-bold text-slate-700 uppercase mb-1">Appointment Date <span class="text-rose-500">*</span></label>
+            <input type="date" id="adminModalDateAppointment" required class="w-full rounded-xl border border-slate-300 p-2.5 text-xs outline-none focus:border-indigo-500">
+          </div>
+          <div>
+            <label for="adminModalDateRetirement" class="block text-xs font-bold text-slate-700 uppercase mb-1">Retirement Date <span class="text-rose-500">*</span></label>
+            <input type="date" id="adminModalDateRetirement" required class="w-full rounded-xl border border-slate-300 p-2.5 text-xs outline-none focus:border-indigo-500">
+          </div>
+        </div>
+
+        <div id="adminModalAppointmentWrapper" class="p-3 rounded-xl border border-transparent transition">
+          <div class="flex items-center justify-between mb-1">
+            <label for="adminModalAppointmentNature" class="block text-xs font-bold text-slate-700 uppercase">Appointment Nature (Aided Schools)</label>
+            <span id="adminModalAidedBadge" class="hidden text-[11px] font-semibold text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded">Aided</span>
+          </div>
+          <select id="adminModalAppointmentNature" class="w-full rounded-xl border border-slate-300 p-2.5 text-xs outline-none focus:border-indigo-500">
+            <option value="">-- None / Standard --</option>
+            <option value="Approver">Approver</option>
+            <option value="Un-Approved">Un-Approved</option>
+            <option value="Self-Finance">Self-Finance</option>
+            <option value="Part-Time">Part-Time</option>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label for="adminModalArea" class="block text-xs font-bold text-slate-700 uppercase mb-1">Area <span class="text-rose-500">*</span></label>
+            <input type="text" id="adminModalArea" required placeholder="Block / Town" class="w-full rounded-xl border border-slate-300 p-2.5 text-xs outline-none focus:border-indigo-500">
+          </div>
+          <div>
+            <label for="adminModalEmail" class="block text-xs font-bold text-slate-700 uppercase mb-1">Email <span class="text-rose-500">*</span></label>
+            <input type="email" id="adminModalEmail" required placeholder="teacher@example.com" class="w-full rounded-xl border border-slate-300 p-2.5 text-xs outline-none focus:border-indigo-500">
+          </div>
+          <div>
+            <label for="adminModalMobile" class="block text-xs font-bold text-slate-700 uppercase mb-1">Mobile No <span class="text-rose-500">*</span></label>
+            <input type="tel" id="adminModalMobile" maxlength="10" required placeholder="10-digit mobile" class="w-full rounded-xl border border-slate-300 p-2.5 text-xs font-mono outline-none focus:border-indigo-500">
+          </div>
+        </div>
+
+        <div>
+          <label for="adminModalAddress" class="block text-xs font-bold text-slate-700 uppercase mb-1">Address with Pincode <span class="text-rose-500">*</span></label>
+          <textarea id="adminModalAddress" rows="2" required placeholder="Address" class="w-full rounded-xl border border-slate-300 p-2.5 text-xs outline-none focus:border-indigo-500"></textarea>
+        </div>
+
+        <div>
+          <label for="adminModalRemarks" class="block text-xs font-bold text-slate-700 uppercase mb-1">Remarks</label>
+          <textarea id="adminModalRemarks" rows="2" placeholder="Optional notes" class="w-full rounded-xl border border-slate-300 p-2.5 text-xs outline-none focus:border-indigo-500"></textarea>
+        </div>
+
+        <div class="flex justify-end space-x-3 pt-3 border-t border-slate-200">
+          <button type="button" onclick="closeAdminTeacherModal()" class="px-5 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition">
+            Cancel
+          </button>
+          <button type="submit" id="adminModalSaveBtn" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-sm transition">
+            Save Record to Database
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- EBS 2026-27 Export Modal                                  -->
+  <!-- ========================================================= -->
+  <div id="ebsExportModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200/80 my-8 space-y-6 animate-scale-up">
+      <!-- Modal Header -->
+      <div class="flex items-start justify-between pb-4 border-b border-slate-100">
+        <div class="flex items-center space-x-3">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center text-xl shrink-0">
+            <i class="fa-solid fa-file-excel"></i>
+          </div>
+          <div>
+            <h3 class="text-lg sm:text-xl font-bold text-slate-900">Official EBS 2026-27 Data Export</h3>
+            <p class="text-xs text-slate-500">DEO (Secondary) Marthandam &bull; Forms 1–7, Checklist &amp; Subjects</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeEbsExportModal()" class="text-slate-400 hover:text-slate-700 p-2 rounded-xl hover:bg-slate-100 transition cursor-pointer">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <form id="ebsExportForm" onsubmit="handleEbsExportSubmit(event)" class="space-y-5 text-xs">
+        <!-- Scope 1: School Selection -->
+        <div>
+          <label for="exportSchoolSelect" class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+            <i class="fa-solid fa-school text-indigo-600 mr-1"></i> School Scope
+          </label>
+          <select id="exportSchoolSelect" class="w-full rounded-xl border border-slate-300 p-2.5 outline-none focus:border-indigo-500 bg-slate-50 focus:bg-white text-xs">
+            <option value="ALL">All District Schools (Combined Workbook)</option>
+            <!-- Populated dynamically with all 139 schools -->
+          </select>
+          <p class="text-[11px] text-slate-400 mt-1">Select an individual school to export only its verified registry, or choose All Schools.</p>
+        </div>
+
+        <!-- Scope 2: Sheet Target -->
+        <div>
+          <label for="exportSheetSelect" class="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+            <i class="fa-solid fa-layer-group text-indigo-600 mr-1"></i> Sheet Selection
+          </label>
+          <select id="exportSheetSelect" class="w-full rounded-xl border border-slate-300 p-2.5 outline-none focus:border-indigo-500 bg-slate-50 focus:bg-white text-xs">
+            <option value="ALL">Full Official Workbook (All 9 Sheets: Forms 1-7, CHECK &amp; Subjects)</option>
+            <option value="CHECK">CHECK: Post Count Matrix &amp; Summary</option>
+            <option value="HSS HM">Form 1: HSS HM</option>
+            <option value="HS HM">Form 2: HS HM</option>
+            <option value="PG">Form 3: Post Graduate Teachers (PG)</option>
+            <option value="BT">Form 4: BT Teachers &amp; Pandits</option>
+            <option value="SEC GRADE">Form 5: Secondary Grade Teachers</option>
+            <option value="SPL TEACHER">Form 6: Special Teachers (Drawing, Music, Sewing, Craft)</option>
+            <option value="OFFICE">Form 7: Office Non-Teaching Staff</option>
+            <option value="Subjects">Subjects: Official 35 Subject Directory</option>
+          </select>
+          <p class="text-[11px] text-slate-400 mt-1">Choose a single sheet to export just that specific form, or Full Official Workbook for all sheets.</p>
+        </div>
+
+        <!-- Advanced Filter Overrides -->
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="font-bold uppercase tracking-wider text-slate-700 flex items-center text-[11px]">
+              <i class="fa-solid fa-sliders text-indigo-600 mr-1.5"></i> Optional Filters
+            </span>
+            <span class="text-[11px] text-slate-400">Leave blank to export all matching records</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label for="exportSchoolType" class="block font-semibold text-slate-600 mb-1">School Type</label>
+              <select id="exportSchoolType" class="w-full rounded-xl border border-slate-300 p-2 outline-none bg-white text-xs">
+                <option value="">Any Type</option>
+                <option value="GOVERNMENT">GOVERNMENT</option>
+                <option value="FULLY AIDED">FULLY AIDED</option>
+                <option value="PARTIALLY AIDED">PARTIALLY AIDED</option>
+                <option value="SELF FINANCE">SELF FINANCE</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="exportDesignation" class="block font-semibold text-slate-600 mb-1">Designation</label>
+              <select id="exportDesignation" class="w-full rounded-xl border border-slate-300 p-2 outline-none bg-white text-xs">
+                <option value="">Any Designation</option>
+                <option value="HSS HM">HSS HM</option>
+                <option value="HS HM">HS HM</option>
+                <option value="PG. ASST.">PG. ASST.</option>
+                <option value="PHYSICAL DIRECTOR">PHYSICAL DIRECTOR</option>
+                <option value="VOCATIONAL INSTRUCTOR">VOCATIONAL INSTRUCTOR</option>
+                <option value="COMPUTER INSTRUCTOR">COMPUTER INSTRUCTOR</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="exportMainSubject" class="block font-semibold text-slate-600 mb-1">Main Subject</label>
+              <select id="exportMainSubject" class="w-full rounded-xl border border-slate-300 p-2 outline-none bg-white text-xs subject-select-main">
+                <!-- populated dynamically -->
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label for="exportSearch" class="block font-semibold text-slate-600 mb-1">Search Keywords</label>
+            <input type="text" id="exportSearch" placeholder="Teacher name, mobile, qualification..." class="w-full rounded-xl border border-slate-300 p-2 outline-none bg-white text-xs">
+          </div>
+        </div>
+
+        <!-- Format Selection -->
+        <div>
+          <label class="block font-bold text-slate-700 uppercase tracking-wider mb-2">
+            <i class="fa-solid fa-file-code text-indigo-600 mr-1"></i> Output File Format
+          </label>
+          <div class="grid grid-cols-2 gap-3">
+            <label class="flex items-center space-x-3 p-3 rounded-xl border border-emerald-300 bg-emerald-50/50 cursor-pointer hover:bg-emerald-50 transition">
+              <input type="radio" name="exportFormatRadio" value="xlsx" checked class="text-emerald-600 focus:ring-emerald-500">
+              <div>
+                <span class="block font-bold text-slate-900 text-xs">Excel Workbook (.xlsx)</span>
+                <span class="block text-[11px] text-slate-500">Official styled layout &amp; formulas</span>
+              </div>
+            </label>
+            <label class="flex items-center space-x-3 p-3 rounded-xl border border-slate-200 bg-white cursor-pointer hover:bg-slate-50 transition">
+              <input type="radio" name="exportFormatRadio" value="csv" class="text-indigo-600 focus:ring-indigo-500">
+              <div>
+                <span class="block font-bold text-slate-900 text-xs">Comma Separated (.csv)</span>
+                <span class="block text-[11px] text-slate-500">Single sheet tabular format</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center justify-end space-x-3 pt-4 border-t border-slate-100">
+          <button type="button" onclick="closeEbsExportModal()" class="px-5 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition cursor-pointer">
+            Cancel
+          </button>
+          <button type="submit" id="exportDownloadSubmitBtn" class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-md transition flex items-center space-x-2 cursor-pointer">
+            <i class="fa-solid fa-download"></i>
+            <span>Generate &amp; Download</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Global Footer -->
+  <footer class="w-full py-4 px-4 text-center text-xs text-slate-500 border-t border-slate-200/80 bg-white/70 mt-auto">
+    <p>EBS DATA ENTRY SYSTEM &bull; District Educational Office (Secondary) Marthandam &bull; All Rights Reserved &copy; 2026-27</p>
+  </footer>
+
+  <!-- Core JavaScript Application Logic -->
+  <script src="app.js"></script>
+</body>
+</html>
+

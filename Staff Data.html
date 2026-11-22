@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Data Collection Portal</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for clean UI icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        /* Custom scrollbar for wide data table */
+        .table-container::-webkit-scrollbar {
+            height: 8px;
+        }
+        .table-container::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 8px;
+        }
+        .table-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 8px;
+        }
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+
+    <!-- Top Navigation / Header -->
+    <header class="bg-slate-900 text-white shadow-md sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div class="flex items-center space-x-3">
+                <div class="bg-indigo-600 p-2.5 rounded-xl shadow-inner">
+                    <i class="fa-solid fa-chalkboard-user text-xl text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-xl font-bold tracking-tight">Teacher Information & Service Registry</h1>
+                    <p class="text-xs text-slate-400">Official Staff Data Entry & Export System</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <span id="recordCounterBadge" class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-indigo-950 text-indigo-200 border border-indigo-700/50">
+                    <i class="fa-solid fa-database mr-1.5"></i> <span id="totalRecordsCount">0</span> Records Saved
+                </span>
+                <button type="button" onclick="exportToCSV()" class="inline-flex items-center px-4 py-2 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white text-xs sm:text-sm font-semibold rounded-xl shadow-sm transition duration-150 cursor-pointer">
+                    <i class="fa-solid fa-file-csv mr-2"></i> Export CSV
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Custom Toast Notification Banner (Replaces alert) -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Custom Confirmation Modal (Replaces confirm) -->
+    <div id="confirmModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 transform transition-all">
+            <div class="flex items-center space-x-3 text-rose-600 mb-3">
+                <div class="bg-rose-100 p-2.5 rounded-full">
+                    <i class="fa-solid fa-triangle-exclamation text-lg"></i>
+                </div>
+                <h3 id="confirmModalTitle" class="text-lg font-bold text-slate-900">Confirm Action</h3>
+            </div>
+            <p id="confirmModalMessage" class="text-sm text-slate-600 mb-6">Are you sure you want to proceed?</p>
+            <div class="flex justify-end space-x-3">
+                <button type="button" id="confirmCancelBtn" class="px-4 py-2.5 rounded-xl text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 transition cursor-pointer">
+                    Cancel
+                </button>
+                <button type="button" id="confirmProceedBtn" class="px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-rose-600 hover:bg-rose-700 shadow-sm transition cursor-pointer">
+                    Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+        <!-- Edit Mode Banner -->
+        <div id="editModeBanner" class="hidden bg-amber-50 border-l-4 border-amber-500 p-4 rounded-xl shadow-xs flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-pen-to-square text-amber-600 text-lg"></i>
+                <div>
+                    <p class="text-sm font-semibold text-amber-900">Editing Existing Record</p>
+                    <p class="text-xs text-amber-700">Update the fields below and click "Update Record" to save changes.</p>
+                </div>
+            </div>
+            <button type="button" onclick="cancelEdit()" class="px-3 py-1.5 bg-amber-200/70 hover:bg-amber-200 text-amber-900 text-xs font-semibold rounded-lg transition cursor-pointer">
+                Cancel Edit
+            </button>
+        </div>
+
+        <!-- Data Entry Form -->
+        <form id="teacherForm" class="space-y-6" novalidate>
+            <input type="hidden" id="editRecordId" value="">
+
+            <!-- SECTION 1: SCHOOL DETAILS -->
+            <section class="bg-white rounded-2xl shadow-xs border border-slate-200/80 overflow-hidden">
+                <div class="bg-slate-50/80 border-b border-slate-200/80 px-6 py-4 flex items-center space-x-2.5">
+                    <span class="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold">1</span>
+                    <h2 class="text-base font-bold text-slate-800 uppercase tracking-wider">School Details</h2>
+                </div>
+                <div class="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                    <!-- 1. Sl No -->
+                    <div>
+                        <label for="slNo" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
+                            Sl No <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="number" id="slNo" name="slNo" min="1" required placeholder="e.g., 1"
+                            class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition">
+                    </div>
+
+                    <!-- 2. UDISE CODE -->
+                    <div>
+                        <label for="udiseCode" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
+                            UDISE CODE <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="text" id="udiseCode" name="udiseCode" maxlength="11" pattern="\d{11}" required placeholder="11-digit UDISE Code"
+                            class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 font-mono focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition">
+                        <p class="text-[11px] text-slate-400 mt-1">Must be 11 numeric digits</p>
+                    </div>
+
+                    <!-- 3. SCHOOL NAME -->
+                    <div class="sm:col-span-2">
+                        <label for="schoolName" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
+                            SCHOOL NAME <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="text" id="schoolName" name="schoolName" required placeholder="Enter full official school name"
+                            class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition">
+                    </div>
+
+                    <!-- 4. SCHOOL TYPE -->
+                    <div class="sm:col-span-2 lg:col-span-4">
+                        <label for="schoolType" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
+                            SCHOOL TYPE <span class="text-rose-500">*</span>
+                        </label>
+                        <select id="schoolType" name="schoolType" required
+                            class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition">
+                            <option value="" disabled selected>-- Select School Type --</option>
+                            <option value="GOVERNMENT">GOVERNMENT</option>
+                            <option value="FULLY AIDED">FULLY AIDED</option>
+                            <option value="PARTIALLY AIDED">PARTIALLY AIDED</option>
+                            <option value="SELF FINANCE">SELF FINANCE</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 2: TEACHER PERSONAL & SERVICE DETAILS -->
+            <section class="bg-white rounded-2xl shadow-xs border border-slate-200/80 overflow-hidden">
+                <div class="bg-slate-50/80 border-b border-slate-200/80 px-6 py-4 flex items-center space-x-2.5">
+                    <span class="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold">2</span>
+                    <h2 class="text-base font-bold text-slate-800 uppercase tracking-wider">Teacher Personal & Service Details</h2>
+                </div>
+                <div class="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                    <!-- 5. NAME OF THE TEACHER -->
+                    <div class="sm:col-span-2 lg:col-span-1">
+                        <label for="teacherName" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
+                            NAME OF THE TEACHER <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="text" id="teacherName" name="teacherName" required placeholder="Enter full name with initials"
+                            class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition">
+                    </div>
+
+                    <!-- 6. SEX -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
+                            SEX <span class="text-rose-500">*</span>
+                        </label>
+                        <div class="grid grid-cols-3 gap-2 pt-0.5">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="sex" value="Male" required class="peer sr-only">
+                                <div class="text-center py-2.5 px-2 rounded-xl border border-slate-300 text-xs font-semibold text-slate-700 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600 hover:bg-slate-50 transition">
+                                    Male
+                                </div>
+                            </label>
+                            <label class="cursor-pointer">
+                                <input type="radio" name="sex" value="Female" required class="peer sr-only">
+                                <div class="text-center py-2.5 px-2 rounded-xl border border-slate-300 text-xs font-semibold text-slate-700 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600 hover:bg-slate-50 transition">
+                                    Female
+                                </div>
+                            </label>
+                            <label class="cursor-pointer">
+                                <input type="radio" name="sex" value="Others" required class="peer sr-only">
+                                <div class="text-center py-2.5 px-2 rounded-xl border border-slate-300 text-xs font-semibold text-slate-700 peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-600 hover:bg-slate-50 transition">
+                                    Others
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 7. DESIGNATION -->
+                    <div>
+                        <label for="designation" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
+                            DESIGNATION <span class="text-rose-500">*</span>
+                        </label>
+                        <select id="designation" name="designation" required
+                            class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition">
+                            <option value="" disabled selected>-- Select Designation --</option>
+			    <option value="HSS HM">PG. ASST.</option>
+			    <option value="HS HM">PG. ASST.</option>
+                            <option value="PG. ASST.">PG. ASST.</option>
+                            <option value="PHYSICAL DIRECTOR">PHYSICAL DIRECTOR</option>
+                            <option value="VOCATIONAL INSTRUCTOR">VOCATIONAL INSTRUCTOR</option>
+                            <option value="COMPUTER INSTRUCTOR">COMPUTER INSTRUCTOR</option>
+                        </select>
+                    </div>
+
+                    <!-- 8. EDUCATIONAL QUALIFICATION -->
+                    <div class="sm:col-span-2 lg:col-span-3">
+                        <label for="qualification" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
+                            EDUCATIONAL QUALIFICATION <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="text" id="qualification" name="qualification" required placeholder="e.g., M.Sc., B.Ed., M.Phil."
+                            class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition">
+                    </div>
+
+                    <!-- 12. DATE OF BIRTH -->
+                    <div>
+                        <label for="dob" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
+                            DATE OF BIRTH <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="date" id="dob" name="dob" required
+                            class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition">
+                    </div>
+
+                    <!-- 13. DATE OF APPOINTMENT IN THE PRESENT POST -->
+                    <div>
+                        <label for="dateOfAppointment" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
+                            DATE OF APPOINTMENT IN THE PRESENT POST <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="date" id="dateOfAppointment" name="dateOfAppointment" required
+                            class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition">
+                    </div>
+
+                    <!-- 14. DATE OF RETIREMENT -->
+                    <div>
+                        <label for="dateOfRetirement" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
+                            DATE OF RETIREMENT <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="date" id="dateOfRetirement" name="dateOfRetirement" required
+                            class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition">
+                    </div>
+
+                    <!-- 15. APPOINTMENT NATURE (FOR AIDED SCHOOLS ONLY) -->
+                    <div id="appointmentNatureWrapper" class="sm:col-span-2 lg:col-span-3 rounded-xl p-3 -mx-3 transition-colors duration-200">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+                            <label for="appointmentNature" class="block text-xs font-bold text-slate-700 uppercase tracking-wide">
+                                APPOINTMENT NATURE <span class="text-slate-400 font-normal">(FOR AIDED SCHOOLS ONLY)</span>
+                            </label>
+                            <span id="aidedSchoolBadge" class="hidden inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-indigo-100 text-indigo-700">
+                                <i class="fa-solid fa-circle-info mr-1"></i> Aided School Selected
+                            </span>
+                        </div>
+                        <select id="appointmentNature" name="appointmentNature"
+                            class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition">
+                            <option value="" selected>-- Select Appointment Nature --</option>
+                            <option value="Approver">Approver</option>
+                            <option value="Un-Approved">Un-Approved</option>
+                            <option value="Self-Finance">Self-Finance</option>
+                            <option value="Part-Time">Part-Time</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 3: SUBJECT & TEACHING DETAILS -->
+            <section class="bg-white rounded-2xl shadow-xs border border-slate-200/80 overflow-hidden">
+                <div class="bg-slate-50/80 border-b border-slate-200/80 px-6 py-4 flex items-center space-x-2.5">
+                    <span class="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold">3</span>
+                    <h2 class="text-base font-bold text-slate-800 uppercase tracking-wider">Subject & Teaching Details</h2>
+                </div>
+                <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <!-- 9. MAIN SUBJECT TEACHING -->
+                    <div>
+                        <label for="mainSubject" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
+                            MAIN SUBJECT TEACHING <span class="text-rose-500">*</span>
+                        </label>
+                        <select id="mainSubject" name="mainSubject" required
+                            class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition">
+                            <option value="" disabled selected>-- Select Main Subject --</option>
+                            <option value="TAMIL">TAMIL</option>
+                            <option value="MALAYALAM">MALAYALAM</option>
+                            <option value="ENGLISH">ENGLISH</option>
+                            <option value="MATHS">MATHS</option>
+                            <option value="PHYSICS">PHYSICS</option>
+                            <option value="CHEMISTRY">CHEMISTRY</option>
+                            <option value="BIOLOGY">BIOLOGY</option>
+                            <option value="BOTANY">BOTANY</option>
+                            <option value="ZOOLOGY">ZOOLOGY</option>
+                            <option value="COMPUTER SCIENCE">COMPUTER SCIENCE</option>
+                            <option value="EMPLOYABILIGY SKILLS">EMPLOYABILIGY SKILLS</option>
+                            <option value="COMPUTER APPLICATION">COMPUTER APPLICATION</option>
+                            <option value="MICRO BIOLOGY">MICRO BIOLOGY</option>
+                            <option value="BUSINESS MATHS AND STATISTIC">BUSINESS MATHS AND STATISTIC</option>
+                            <option value="HOME SCIENCE">HOME SCIENCE</option>
+                            <option value="STATISTICS">STATISTICS</option>
+                            <option value="VANCE TAMIL">VANCE TAMIL</option>
+                            <option value="ETHICS AND INDIAN CULTURE">ETHICS AND INDIAN CULTURE</option>
+                            <option value="HISTORY">HISTORY</option>
+                            <option value="GEOGRAPHY">GEOGRAPHY</option>
+                            <option value="ECONOMICS">ECONOMICS</option>
+                            <option value="POLITICAL SCIENCE">POLITICAL SCIENCE</option>
+                            <option value="COMMERCE">COMMERCE</option>
+                            <option value="ACCOUNTANCY">ACCOUNTANCY</option>
+                            <option value="NURSING (G)">NURSING (G)</option>
+                            <option value="NURSING (V)">NURSING (V)</option>
+                            <option value="BASIC ELECTRICAL ENGG. THEORY">BASIC ELECTRICAL ENGG. THEORY</option>
+                            <option value="BASIC ELECTRONICS ENGG. THEORY">BASIC ELECTRONICS ENGG. THEORY</option>
+                            <option value="BASIC CIVIL ENGG. THEROY">BASIC CIVIL ENGG. THEROY</option>
+                            <option value="BASIC MECHANICAL ENGG THEORY">BASIC MECHANICAL ENGG THEORY</option>
+                            <option value="AGRICULTURE SICENCE THEORY">AGRICULTURE SICENCE THEORY</option>
+                            <option value="OFFICE MANAGEMENT AND SECRETARYSHIP THEORY">OFFICE MANAGEMENT AND SECRETARYSHIP THEORY</option>
+                            <option value="LANGUAGE HINDI">LANGUAGE HINDI</option>
+                            <option value="LANGUAGE FRENCH">LANGUAGE FRENCH</option>
+                            <option value="NIL">NIL</option>
+                        </select>
+                    </div>
+
+                    <!-- 10. OTHER SUBJECT TEACHING -->
+                    <div>
+                        <label for="otherSubject" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
+                            OTHER SUBJECT TEACHING <span class="text-rose-500">*</span>
+                        </label>
+                        <select id="otherSubject" name="otherSubject" required
+                            class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition">
+                            <option value="TAMIL">TAMIL</option>
+                            <option value="MALAYALAM">MALAYALAM</option>
+                            <option value="ENGLISH">ENGLISH</option>
+                            <option value="MATHS">MATHS</option>
+                            <option value="PHYSICS">PHYSICS</option>
+                            <option value="CHEMISTRY">CHEMISTRY</option>
+                            <option value="BIOLOGY">BIOLOGY</option>
+                            <option value="BOTANY">BOTANY</option>
+                            <option value="ZOOLOGY">ZOOLOGY</option>
+                            <option value="COMPUTER SCIENCE">COMPUTER SCIENCE</option>
+                            <option value="EMPLOYABILIGY SKILLS">EMPLOYABILIGY SKILLS</option>
+                            <option value="COMPUTER APPLICATION">COMPUTER APPLICATION</option>
+                            <option value="MICRO BIOLOGY">MICRO BIOLOGY</option>
+                            <option value="BUSINESS MATHS AND STATISTIC">BUSINESS MATHS AND STATISTIC</option>
+                            <option value="HOME SCIENCE">HOME SCIENCE</option>
+                            <option value="STATISTICS">STATISTICS</option>
+                            <option value="VANCE TAMIL">VANCE TAMIL</option>
+                            <option value="ETHICS AND INDIAN CULTURE">ETHICS AND INDIAN CULTURE</option>
+                            <option value="HISTORY">HISTORY</option>
+                            <option value="GEOGRAPHY">GEOGRAPHY</option>
+                            <option value="ECONOMICS">ECONOMICS</option>
+                            <option value="POLITICAL SCIENCE">POLITICAL SCIENCE</option>
+                            <option value="COMMERCE">COMMERCE</option>
+                            <option value="ACCOUNTANCY">ACCOUNTANCY</option>
+                            <option value="NURSING (G)">NURSING (G)</option>
+                            <option value="NURSING (V)">NURSING (V)</option>
+                            <option value="BASIC ELECTRICAL ENGG. THEORY">BASIC ELECTRICAL ENGG. THEORY</option>
+                            <option value="BASIC ELECTRONICS ENGG. THEORY">BASIC ELECTRONICS ENGG. THEORY</option>
+                            <option value="BASIC CIVIL ENGG. THEROY">BASIC CIVIL ENGG. THEROY</option>
+                            <option value="BASIC MECHANICAL ENGG THEORY">BASIC MECHANICAL ENGG THEORY</option>
+                            <option value="AGRICULTURE SICENCE THEORY">AGRICULTURE SICENCE THEORY</option>
+                            <option value="OFFICE MANAGEMENT AND SECRETARYSHIP THEORY">OFFICE MANAGEMENT AND SECRETARYSHIP THEORY</option>
+                            <option value="LANGUAGE HINDI">LANGUAGE HINDI</option>
+                            <option value="LANGUAGE FRENCH">LANGUAGE FRENCH</option>
+                            <option value="NIL" selected>NIL</option>
+                        </select>
+                    </div>
+
+                    <!-- 11. MEDIUM OF TEACHING -->
+                    <div>
+                        <label for="mediumOfTeaching" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
+                            MEDIUM OF TEACHING <span class="text-rose-500">*</span>
+                        </label>
+                        <select id="mediumOfTeaching" name="mediumOfTeaching" required
+                            class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition">
+                            <option value="" disabled selected>-- Select Medium --</option>
+                            <option value="Tamil">Tamil</option>
+                            <option value="English">English</option>
+                            <option value="Malayalam">Malayalam</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 4: CONTACT DETAILS & REMARKS -->
+            <section class="bg-white rounded-2xl shadow-xs border border-slate-200/80 overflow-hidden">
+                <div class="bg-slate-50/80 border-b border-slate-200/80 px-6 py-4 flex items-center space-x-2.5">
+                    <span class="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold">4</span>
+                    <h2 class="text-base font-bold text-slate-800 uppercase tracking-wider">Contact Details & Remarks</h2>
+                </div>
+                <div class="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                    <!-- 17. AREA -->
+                    <div>
+                        <label for="area" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
+                            AREA <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="text" id="area" name="area" required placeholder="e.g., Rural / Urban / Town / Block Name"
+                            class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition">
+                    </div>
+
+                    <!-- 18. E-Mail ID -->
+                    <div>
+                        <label for="emailId" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
+                            E-Mail ID <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="email" id="emailId" name="emailId" required placeholder="teacher@example.com"
+                            class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition">
+                    </div>
+
+                    <!-- 19. MOBILE NO -->
+                    <div>
+                        <label for="mobileNo" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
+                            MOBILE NO <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="tel" id="mobileNo" name="mobileNo" maxlength="10" pattern="[6-9]\d{9}" required placeholder="10-digit Mobile Number"
+                            class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 font-mono focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition">
+                    </div>
+
+                    <!-- 16. ADDRESS with PINCODE -->
+                    <div class="sm:col-span-2">
+                        <label for="address" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
+                            ADDRESS with PINCODE <span class="text-rose-500">*</span>
+                        </label>
+                        <textarea id="address" name="address" rows="3" required placeholder="Door No, Street, Village/Town, District - PINCODE"
+                            class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition"></textarea>
+                    </div>
+
+                    <!-- 20. Remarks -->
+                    <div class="sm:col-span-2 lg:col-span-1">
+                        <label for="remarks" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
+                            Remarks
+                        </label>
+                        <textarea id="remarks" name="remarks" rows="3" placeholder="Any additional notes or remarks (optional)"
+                            class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition"></textarea>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Form Action Bar -->
+            <div class="flex flex-col sm:flex-row items-center justify-end gap-3 pt-2">
+                <button type="button" onclick="confirmClearForm()" class="w-full sm:w-auto px-5 py-3 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 text-sm font-semibold transition cursor-pointer flex items-center justify-center">
+                    <i class="fa-solid fa-rotate-left mr-2"></i> Clear Form
+                </button>
+                <button type="submit" id="submitBtn" class="w-full sm:w-auto px-7 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white text-sm font-semibold shadow-md shadow-indigo-600/20 transition cursor-pointer flex items-center justify-center">
+                    <i class="fa-solid fa-plus-circle mr-2"></i> <span id="submitBtnText">Save Teacher Record</span>
+                </button>
+            </div>
+        </form>
+
+        <!-- LIVE COLLECTED RECORDS TABLE -->
+        <section class="bg-white rounded-2xl shadow-xs border border-slate-200/80 overflow-hidden">
+            <div class="bg-slate-50/80 border-b border-slate-200/80 px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                    <h2 class="text-base font-bold text-slate-800 uppercase tracking-wider flex items-center">
+                        <i class="fa-solid fa-table-list text-indigo-600 mr-2"></i> Collected Teacher Records
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-0.5">All records are saved automatically in your browser. Export to CSV anytime.</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-2.5">
+                    <div class="relative flex-grow sm:flex-grow-0">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                        <input type="text" id="searchInput" onkeyup="renderTable()" placeholder="Search name, UDISE, subject..."
+                            class="w-full sm:w-64 pl-8 pr-3 py-2 text-xs rounded-xl border border-slate-300 bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none">
+                    </div>
+                    <button type="button" onclick="confirmDeleteAll()" id="deleteAllBtn" class="hidden px-3.5 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-semibold transition cursor-pointer">
+                        <i class="fa-solid fa-trash-can mr-1.5"></i> Clear All
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-container overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-200 text-left text-xs">
+                    <thead class="bg-slate-100/80 text-slate-600 font-bold uppercase tracking-wider whitespace-nowrap">
+                        <tr>
+                            <th class="px-4 py-3.5 sticky left-0 bg-slate-100 z-10">Actions</th>
+                            <th class="px-4 py-3.5">Sl No</th>
+                            <th class="px-4 py-3.5">UDISE CODE</th>
+                            <th class="px-4 py-3.5">SCHOOL NAME</th>
+                            <th class="px-4 py-3.5">SCHOOL TYPE</th>
+                            <th class="px-4 py-3.5">NAME OF THE TEACHER</th>
+                            <th class="px-4 py-3.5">SEX</th>
+                            <th class="px-4 py-3.5">DESIGNATION</th>
+                            <th class="px-4 py-3.5">EDUCATIONAL QUALIFICATION</th>
+                            <th class="px-4 py-3.5">MAIN SUBJECT TEACHING</th>
+                            <th class="px-4 py-3.5">OTHER SUBJECT TEACHING</th>
+                            <th class="px-4 py-3.5">MEDIUM OF TEACHING</th>
+                            <th class="px-4 py-3.5">DATE OF BIRTH</th>
+                            <th class="px-4 py-3.5">DATE OF APPOINTMENT IN THE PRESENT POST</th>
+                            <th class="px-4 py-3.5">DATE OF RETIREMENT</th>
+                            <th class="px-4 py-3.5">APPOINTMENT NATURE (FOR AIDED SCHOOLS ONLY)</th>
+                            <th class="px-4 py-3.5">ADDRESS with PINCODE</th>
+                            <th class="px-4 py-3.5">AREA</th>
+                            <th class="px-4 py-3.5">E-Mail ID</th>
+                            <th class="px-4 py-3.5">MOBILE NO</th>
+                            <th class="px-4 py-3.5">Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recordsTableBody" class="divide-y divide-slate-200 bg-white whitespace-nowrap">
+                        <!-- Rows populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="py-12 px-4 text-center">
+                <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 mb-3">
+                    <i class="fa-regular fa-folder-open text-xl"></i>
+                </div>
+                <h3 class="text-sm font-semibold text-slate-800">No Teacher Records Yet</h3>
+                <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">Fill out the form above and click "Save Teacher Record" to add entries to this registry.</p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-4 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-2">
+            <p>Teacher Data Collection & Management System</p>
+            <p>Data is stored locally in your browser storage.</p>
+        </div>
+    </footer>
+
+    <script>
+        /**
+         * Complete list of Subjects in exact requested order
+         */
+        const SUBJECT_OPTIONS = [
+            "TAMIL",
+            "MALAYALAM",
+            "ENGLISH",
+            "MATHS",
+            "PHYSICS",
+            "CHEMISTRY",
+            "BIOLOGY",
+            "BOTANY",
+            "ZOOLOGY",
+            "COMPUTER SCIENCE",
+            "EMPLOYABILIGY SKILLS",
+            "COMPUTER APPLICATION",
+            "MICRO BIOLOGY",
+            "BUSINESS MATHS AND STATISTIC",
+            "HOME SCIENCE",
+            "STATISTICS",
+            "VANCE TAMIL",
+            "ETHICS AND INDIAN CULTURE",
+            "HISTORY",
+            "GEOGRAPHY",
+            "ECONOMICS",
+            "POLITICAL SCIENCE",
+            "COMMERCE",
+            "ACCOUNTANCY",
+            "NURSING (G)",
+            "NURSING (V)",
+            "BASIC ELECTRICAL ENGG. THEORY",
+            "BASIC ELECTRONICS ENGG. THEORY",
+            "BASIC CIVIL ENGG. THEROY",
+            "BASIC MECHANICAL ENGG THEORY",
+            "AGRICULTURE SICENCE THEORY",
+            "OFFICE MANAGEMENT AND SECRETARYSHIP THEORY",
+            "LANGUAGE HINDI",
+            "LANGUAGE FRENCH",
+            "NIL"
+];
+
+        /**
+         * Populate MAIN SUBJECT TEACHING and OTHER SUBJECT TEACHING dropdowns
+         */
+        function populateSubjectDropdowns() {
+            const mainSelect = document.getElementById("mainSubject");
+            const otherSelect = document.getElementById("otherSubject");
+
+            mainSelect.innerHTML = '<option value="" disabled selected>-- Select Main Subject --</option>';
+            otherSelect.innerHTML = "";
+
+            SUBJECT_OPTIONS.forEach(subject => {
+                const mainOpt = document.createElement("option");
+                mainOpt.value = subject;
+                mainOpt.textContent = subject;
+                mainSelect.appendChild(mainOpt);
+
+                const otherOpt = document.createElement("option");
+                otherOpt.value = subject;
+                otherOpt.textContent = subject;
+                if (subject === "NIL") {
+                    otherOpt.selected = true;
+                }
+                otherSelect.appendChild(otherOpt);
+            });
+        }
+
+        /**
+         * Auto-increment Sl No based on saved records
+         */
+        function setupAutoSlNo() {
+            const slNoInput = document.getElementById("slNo");
+            if (!slNoInput) return;
+            const maxSl = teacherRecords.reduce((max, r) => {
+                const n = parseInt(r.slNo, 10);
+                return !isNaN(n) && n > max ? n : max;
+            }, 0);
+            slNoInput.value = maxSl + 1;
+        }
+
+        /**
+         * Restrict numeric-only fields (UDISE CODE and MOBILE NO) to digits
+         */
+        function setupInputFilters() {
+            ["udiseCode", "mobileNo"].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener("input", () => {
+                        el.value = el.value.replace(/\D/g, "");
+                    });
+                }
+            });
+        }
+
+        const STORAGE_KEY = "teacher_registry_records_v1";
+        let teacherRecords = [];
+        let confirmCallback = null;
+
+        /**
+         * Initialize Dropdowns, Load Saved Data, and Attach Listeners
+         */
+        document.addEventListener("DOMContentLoaded", () => {
+            populateSubjectDropdowns();
+            loadRecordsFromStorage();
+            setupAutoSlNo();
+            setupInputFilters();
+            setupSchoolTypeHighlight();
+            renderTable();
+        });
+
+        /**
+         * Highlight Appointment Nature field when School Type is FULLY AIDED or PARTIALLY AIDED
+         */
+        function setupSchoolTypeHighlight() {
+            const schoolTypeSelect = document.getElementById("schoolType");
+            schoolTypeSelect.addEventListener("change", updateAppointmentNatureHighlight);
+        }
+
+        function updateAppointmentNatureHighlight() {
+            const schoolType = document.getElementById("schoolType").value;
+            const wrapper = document.getElementById("appointmentNatureWrapper");
+            const badge = document.getElementById("aidedSchoolBadge");
+            const input = document.getElementById("appointmentNature");
+
+            const isAided = schoolType === "FULLY AIDED" || schoolType === "PARTIALLY AIDED";
+            if (isAided) {
+                wrapper.classList.add("bg-indigo-50/70", "border", "border-indigo-200/80");
+                badge.classList.remove("hidden");
+                input.classList.replace("border-slate-300", "border-indigo-400");
+            } else {
+                wrapper.classList.remove("bg-indigo-50/70", "border", "border-indigo-200/80");
+                badge.classList.add("hidden");
+                input.classList.replace("border-indigo-400", "border-slate-300");
+            }
+        }
+
+        /**
+         * Load records from localStorage safely
+         */
+        function loadRecordsFromStorage() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                teacherRecords = raw ? JSON.parse(raw) : [];
+            } catch (e) {
+                console.error("Failed to read from localStorage:", e);
+                teacherRecords = [];
+            }
+        }
+
+        /**
+         * Persist records to localStorage safely
+         */
+        function saveRecordsToStorage() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(teacherRecords));
+            } catch (e) {
+                showToast("Warning: Could not save to browser storage.", "error");
+            }
+        }
+
+        /**
+         * Form Submission Handler (Create or Update)
+         */
+        document.getElementById("teacherForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            // Custom Validation Checks
+            const udise = document.getElementById("udiseCode").value.trim();
+            if (!/^\d{11}$/.test(udise)) {
+                showToast("UDISE CODE must be exactly 11 digits.", "error");
+                document.getElementById("udiseCode").focus();
+                return;
+            }
+
+            const mobile = document.getElementById("mobileNo").value.trim();
+            if (!/^\d{10}$/.test(mobile)) {
+                showToast("MOBILE NO must be a valid 10-digit number.", "error");
+                document.getElementById("mobileNo").focus();
+                return;
+            }
+
+            const sexRadio = document.querySelector('input[name="sex"]:checked');
+            if (!sexRadio) {
+                showToast("Please select SEX (Male, Female, or Others).", "error");
+                return;
+            }
+
+            // Standard HTML5 Validity Check for remaining required fields
+            if (!this.checkValidity()) {
+                this.reportValidity();
+                showToast("Please fill in all required fields marked with *.", "error");
+                return;
+            }
+
+            const editId = document.getElementById("editRecordId").value;
+            const recordData = {
+                id: editId || "rec_" + Date.now() + "_" + Math.random().toString(36).substring(2, 7),
+                slNo: document.getElementById("slNo").value.trim(),
+                udiseCode: udise,
+                schoolName: document.getElementById("schoolName").value.trim(),
+                schoolType: document.getElementById("schoolType").value,
+                teacherName: document.getElementById("teacherName").value.trim(),
+                sex: sexRadio.value,
+                designation: document.getElementById("designation").value,
+                qualification: document.getElementById("qualification").value.trim(),
+                mainSubject: document.getElementById("mainSubject").value,
+                otherSubject: document.getElementById("otherSubject").value,
+                mediumOfTeaching: document.getElementById("mediumOfTeaching").value,
+                dob: document.getElementById("dob").value,
+                dateOfAppointment: document.getElementById("dateOfAppointment").value,
+                dateOfRetirement: document.getElementById("dateOfRetirement").value,
+                appointmentNature: document.getElementById("appointmentNature").value,
+                address: document.getElementById("address").value.trim(),
+                area: document.getElementById("area").value.trim(),
+                emailId: document.getElementById("emailId").value.trim(),
+                mobileNo: mobile,
+                remarks: document.getElementById("remarks").value.trim()
+            };
+
+            if (editId) {
+                const index = teacherRecords.findIndex(r => r.id === editId);
+                if (index !== -1) {
+                    teacherRecords[index] = recordData;
+                    showToast("Teacher record updated successfully!", "success");
+                }
+                exitEditMode();
+            } else {
+                teacherRecords.push(recordData);
+                showToast("Teacher record saved successfully!", "success");
+            }
+
+            saveRecordsToStorage();
+            resetFormFields();
+            renderTable();
+        });
+
+        /**
+         * Reset form fields cleanly and set defaults
+         */
+        function resetFormFields() {
+            const form = document.getElementById("teacherForm");
+            form.reset();
+            document.getElementById("otherSubject").value = "NIL";
+            document.getElementById("editRecordId").value = "";
+            updateAppointmentNatureHighlight();
+            setupAutoSlNo();
+        }
+
+        /**
+         * Confirm clearing the form
+         */
+        function confirmClearForm() {
+            openConfirmModal(
+                "Clear Form Fields",
+                "Are you sure you want to clear all currently entered inputs in the form?",
+                () => {
+                    exitEditMode();
+                    resetFormFields();
+                    showToast("Form cleared.", "info");
+                }
+            );
+        }
+
+        /**
+         * Populate form with an existing record for editing
+         */
+        function editRecord(id) {
+            const record = teacherRecords.find(r => r.id === id);
+            if (!record) return;
+
+            document.getElementById("editRecordId").value = record.id;
+            document.getElementById("slNo").value = record.slNo;
+            document.getElementById("udiseCode").value = record.udiseCode;
+            document.getElementById("schoolName").value = record.schoolName;
+            document.getElementById("schoolType").value = record.schoolType;
+            document.getElementById("teacherName").value = record.teacherName;
+
+            const sexRadio = document.querySelector(`input[name="sex"][value="${record.sex}"]`);
+            if (sexRadio) sexRadio.checked = true;
+
+            document.getElementById("designation").value = record.designation;
+            document.getElementById("qualification").value = record.qualification;
+            document.getElementById("mainSubject").value = record.mainSubject;
+            document.getElementById("otherSubject").value = record.otherSubject || "NIL";
+            document.getElementById("mediumOfTeaching").value = record.mediumOfTeaching;
+            document.getElementById("dob").value = record.dob;
+            document.getElementById("dateOfAppointment").value = record.dateOfAppointment;
+            document.getElementById("dateOfRetirement").value = record.dateOfRetirement;
+            document.getElementById("appointmentNature").value = record.appointmentNature || "";
+            updateAppointmentNatureHighlight();
+            document.getElementById("address").value = record.address;
+            document.getElementById("area").value = record.area;
+            document.getElementById("emailId").value = record.emailId;
+            document.getElementById("mobileNo").value = record.mobileNo;
+            document.getElementById("remarks").value = record.remarks;
+
+            // Update UI to Edit Mode
+            document.getElementById("editModeBanner").classList.remove("hidden");
+            document.getElementById("submitBtnText").textContent = "Update Record";
+            document.getElementById("submitBtn").classList.replace("bg-indigo-600", "bg-amber-600");
+            document.getElementById("submitBtn").classList.replace("hover:bg-indigo-500", "hover:bg-amber-500");
+
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+
+        /**
+         * Cancel Edit Mode
+         */
+        function cancelEdit() {
+            exitEditMode();
+            resetFormFields();
+            showToast("Edit cancelled.", "info");
+        }
+
+        function exitEditMode() {
+            document.getElementById("editRecordId").value = "";
+            document.getElementById("editModeBanner").classList.add("hidden");
+            document.getElementById("submitBtnText").textContent = "Save Teacher Record";
+            document.getElementById("submitBtn").classList.replace("bg-amber-600", "bg-indigo-600");
+            document.getElementById("submitBtn").classList.replace("hover:bg-amber-500", "hover:bg-indigo-500");
+        }
+
+        /**
+         * Delete a single record with confirmation
+         */
+        function deleteRecord(id) {
+            const record = teacherRecords.find(r => r.id === id);
+            if (!record) return;
+
+            openConfirmModal(
+                "Delete Record",
+                `Are you sure you want to delete the record for "${record.teacherName}" (Sl No: ${record.slNo})?`,
+                () => {
+                    teacherRecords = teacherRecords.filter(r => r.id !== id);
+                    if (document.getElementById("editRecordId").value === id) {
+                        exitEditMode();
+                        resetFormFields();
+                    }
+                    saveRecordsToStorage();
+                    renderTable();
+                    showToast("Record deleted.", "info");
+                }
+            );
+        }
+
+        /**
+         * Delete all records with confirmation
+         */
+        function confirmDeleteAll() {
+            openConfirmModal(
+                "Clear All Saved Records",
+                "This will permanently remove all saved teacher records from your browser. Have you exported them to CSV first?",
+                () => {
+                    teacherRecords = [];
+                    exitEditMode();
+                    resetFormFields();
+                    saveRecordsToStorage();
+                    renderTable();
+                    showToast("All records cleared.", "info");
+                }
+            );
+        }
+
+        /**
+         * Render the records table with live search filtering
+         */
+        function renderTable() {
+            const tbody = document.getElementById("recordsTableBody");
+            const emptyState = document.getElementById("emptyState");
+            const deleteAllBtn = document.getElementById("deleteAllBtn");
+            const totalRecordsCount = document.getElementById("totalRecordsCount");
+            const searchQuery = document.getElementById("searchInput").value.toLowerCase().trim();
+
+            totalRecordsCount.textContent = teacherRecords.length;
+
+            if (teacherRecords.length > 0) {
+                deleteAllBtn.classList.remove("hidden");
+            } else {
+                deleteAllBtn.classList.add("hidden");
+            }
+
+            const filtered = teacherRecords.filter(rec => {
+                if (!searchQuery) return true;
+                return (
+                    rec.teacherName.toLowerCase().includes(searchQuery) ||
+                    rec.udiseCode.toLowerCase().includes(searchQuery) ||
+                    rec.schoolName.toLowerCase().includes(searchQuery) ||
+                    rec.mainSubject.toLowerCase().includes(searchQuery) ||
+                    rec.designation.toLowerCase().includes(searchQuery) ||
+                    rec.mobileNo.includes(searchQuery)
+                );
+            });
+
+            tbody.innerHTML = "";
+
+            if (filtered.length === 0) {
+                emptyState.classList.remove("hidden");
+                if (teacherRecords.length > 0 && searchQuery) {
+                    emptyState.querySelector("h3").textContent = "No Matching Records Found";
+                    emptyState.querySelector("p").textContent = `No records match "${searchQuery}". Try a different keyword.`;
+                } else {
+                    emptyState.querySelector("h3").textContent = "No Teacher Records Yet";
+                    emptyState.querySelector("p").textContent = 'Fill out the form above and click "Save Teacher Record" to add entries to this registry.';
+                }
+                return;
+            }
+
+            emptyState.classList.add("hidden");
+
+            filtered.forEach(rec => {
+                const tr = document.createElement("tr");
+                tr.className = "hover:bg-slate-50/90 transition";
+
+                tr.innerHTML = `
+                    <td class="px-4 py-3 sticky left-0 bg-white border-r border-slate-100 z-10">
+                        <div class="flex items-center space-x-2">
+                            <button type="button" onclick="editRecord('${rec.id}')" title="Edit Record"
+                                class="p-1.5 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition cursor-pointer">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            <button type="button" onclick="deleteRecord('${rec.id}')" title="Delete Record"
+                                class="p-1.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition cursor-pointer">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                    <td class="px-4 py-3 font-semibold text-slate-900">${escapeHTML(rec.slNo)}</td>
+                    <td class="px-4 py-3 font-mono text-slate-700">${escapeHTML(rec.udiseCode)}</td>
+                    <td class="px-4 py-3 font-medium text-slate-900">${escapeHTML(rec.schoolName)}</td>
+                    <td class="px-4 py-3"><span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-medium">${escapeHTML(rec.schoolType)}</span></td>
+                    <td class="px-4 py-3 font-semibold text-indigo-950">${escapeHTML(rec.teacherName)}</td>
+                    <td class="px-4 py-3">${escapeHTML(rec.sex)}</td>
+                    <td class="px-4 py-3 font-medium">${escapeHTML(rec.designation)}</td>
+                    <td class="px-4 py-3">${escapeHTML(rec.qualification)}</td>
+                    <td class="px-4 py-3 font-semibold text-emerald-800">${escapeHTML(rec.mainSubject)}</td>
+                    <td class="px-4 py-3 text-slate-600">${escapeHTML(rec.otherSubject)}</td>
+                    <td class="px-4 py-3">${escapeHTML(rec.mediumOfTeaching)}</td>
+                    <td class="px-4 py-3 font-mono">${escapeHTML(rec.dob)}</td>
+                    <td class="px-4 py-3 font-mono">${escapeHTML(rec.dateOfAppointment)}</td>
+                    <td class="px-4 py-3 font-mono">${escapeHTML(rec.dateOfRetirement)}</td>
+                    <td class="px-4 py-3 text-slate-600">${escapeHTML(rec.appointmentNature || "-")}</td>
+                    <td class="px-4 py-3 max-w-xs truncate" title="${escapeHTML(rec.address)}">${escapeHTML(rec.address)}</td>
+                    <td class="px-4 py-3">${escapeHTML(rec.area)}</td>
+                    <td class="px-4 py-3 text-indigo-600">${escapeHTML(rec.emailId)}</td>
+                    <td class="px-4 py-3 font-mono">${escapeHTML(rec.mobileNo)}</td>
+                    <td class="px-4 py-3 max-w-xs truncate text-slate-500" title="${escapeHTML(rec.remarks)}">${escapeHTML(rec.remarks || "-")}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        /**
+         * Export all collected records to an Excel-compatible CSV file
+         */
+        function exportToCSV() {
+            if (teacherRecords.length === 0) {
+                showToast("No records available to export. Please save at least one record.", "error");
+                return;
+            }
+
+            const headers = [
+                "Sl No",
+                "UDISE CODE",
+                "SCHOOL NAME",
+                "SCHOOL TYPE",
+                "NAME OF THE TEACHER",
+                "SEX",
+                "DESIGNATION",
+                "EDUCATIONAL QUALIFICATION",
+                "MAIN SUBJECT TEACHING",
+                "OTHER SUBJECT TEACHING",
+                "MEDIUM OF TEACHING",
+                "DATE OF BIRTH",
+                "DATE OF APPOINTMENT IN THE PRESENT POST",
+                "DATE OF RETIREMENT",
+                "APPOINTMENT NATURE (FOR AIDED SCHOOLS ONLY)",
+                "ADDRESS with PINCODE",
+                "AREA",
+                "E-Mail ID",
+                "MOBILE NO",
+                "Remarks"
+            ];
+
+            const csvRows = [];
+            csvRows.push(headers.map(h => `"${h.replace(/"/g, '""')}"`).join(","));
+
+            teacherRecords.forEach(rec => {
+                const row = [
+                    rec.slNo,
+                    `\t${rec.udiseCode}`, // Preserve leading zeros in Excel
+                    rec.schoolName,
+                    rec.schoolType,
+                    rec.teacherName,
+                    rec.sex,
+                    rec.designation,
+                    rec.qualification,
+                    rec.mainSubject,
+                    rec.otherSubject,
+                    rec.mediumOfTeaching,
+                    rec.dob,
+                    rec.dateOfAppointment,
+                    rec.dateOfRetirement,
+                    rec.appointmentNature,
+                    rec.address.replace(/\r?\n|\r/g, " "),
+                    rec.area,
+                    rec.emailId,
+                    rec.mobileNo,
+                    rec.remarks.replace(/\r?\n|\r/g, " ")
+                ];
+                csvRows.push(row.map(val => `"${String(val || "").replace(/"/g, '""')}"`).join(","));
+            });
+
+            // Add UTF-8 BOM for proper Excel character encoding
+            const csvString = "\uFEFF" + csvRows.join("\n");
+            const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+
+            const link = document.createElement("a");
+            const dateStamp = new Date().toISOString().slice(0, 10);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `Teacher_Data_Registry_${dateStamp}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            showToast(`Exported ${teacherRecords.length} record(s) to CSV!`, "success");
+        }
+
+        /**
+         * Custom Confirmation Modal Helpers
+         */
+        function openConfirmModal(title, message, onConfirm) {
+            document.getElementById("confirmModalTitle").textContent = title;
+            document.getElementById("confirmModalMessage").textContent = message;
+            confirmCallback = onConfirm;
+            const modal = document.getElementById("confirmModal");
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+        }
+
+        function closeConfirmModal() {
+            const modal = document.getElementById("confirmModal");
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+            confirmCallback = null;
+        }
+
+        document.getElementById("confirmCancelBtn").addEventListener("click", closeConfirmModal);
+        document.getElementById("confirmProceedBtn").addEventListener("click", () => {
+            if (typeof confirmCallback === "function") {
+                confirmCallback();
+            }
+            closeConfirmModal();
+        });
+
+        /**
+         * Custom Toast Notification System (Replaces alert)
+         */
+        function showToast(message, type = "info") {
+            const container = document.getElementById("toastContainer");
+            const toast = document.createElement("div");
+
+            let bgClass = "bg-slate-800 text-white";
+            let iconClass = "fa-circle-info text-indigo-400";
+
+            if (type === "success") {
+                bgClass = "bg-emerald-900 text-white border border-emerald-700";
+                iconClass = "fa-circle-check text-emerald-400";
+            } else if (type === "error") {
+                bgClass = "bg-rose-900 text-white border border-rose-700";
+                iconClass = "fa-circle-exclamation text-rose-400";
+            }
+
+            toast.className = `${bgClass} px-4 py-3 rounded-xl shadow-lg flex items-center space-x-3 text-xs sm:text-sm font-medium transform transition-all duration-300 translate-y-2 opacity-0 pointer-events-auto max-w-sm`;
+            toast.innerHTML = `
+                <i class="fa-solid ${iconClass} text-base"></i>
+                <span>${escapeHTML(message)}</span>
+            `;
+
+            container.appendChild(toast);
+
+            requestAnimationFrame(() => {
+                toast.classList.remove("translate-y-2", "opacity-0");
+            });
+
+            setTimeout(() => {
+                toast.classList.add("opacity-0", "translate-y-2");
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        /**
+         * Escape HTML to prevent XSS in dynamic table rendering
+         */
+        function escapeHTML(str) {
+            return String(str || "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>
