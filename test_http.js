@@ -45,6 +45,7 @@ server.listen(4001, async () => {
       body: JSON.stringify({
         slNo: '1',
         schoolType: 'GOVERNMENT',
+        block: 'Thuckalay',
         teacherName: 'K. Meenakshi',
         sex: 'Female',
         designation: 'PG. ASST.',

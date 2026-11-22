@@ -701,6 +701,7 @@ function renderSchoolTable() {
       <td class="px-4 py-3 font-semibold text-slate-900">${escapeHTML(rec.sl_no)}</td>
       <td class="px-4 py-3 font-mono text-slate-700">${escapeHTML(rec.udise_code)}</td>
       <td class="px-4 py-3 font-medium text-slate-900">${escapeHTML(rec.school_name)}</td>
+      <td class="px-4 py-3 font-semibold text-slate-800">${escapeHTML(rec.block || "-")}</td>
       <td class="px-4 py-3"><span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-medium">${escapeHTML(rec.school_type)}</span></td>
       <td class="px-4 py-3 font-semibold text-indigo-950">${escapeHTML(rec.teacher_name)}</td>
       <td class="px-4 py-3">${escapeHTML(rec.sex)}</td>
@@ -748,11 +749,19 @@ document.getElementById("schoolTeacherForm").addEventListener("submit", async fu
     return;
   }
 
+  const block = document.getElementById("schoolBlock")?.value || "";
+  if (!block) {
+    showToast("Please select Block.", "error");
+    document.getElementById("schoolBlock")?.focus();
+    return;
+  }
+
   const payload = {
     slNo: document.getElementById("schoolSlNo").value.trim(),
     udiseCode: currentUser.schoolUdise,
     schoolName: currentUser.schoolName,
     schoolType: document.getElementById("schoolFormType").value,
+    block: block,
     teacherName: document.getElementById("schoolTeacherName").value.trim(),
     sex: sexRadio.value,
     designation: document.getElementById("schoolDesignation").value,
@@ -813,6 +822,9 @@ function editSchoolRecord(id) {
   document.getElementById("schoolEditRecordId").value = rec.id;
   document.getElementById("schoolSlNo").value = rec.sl_no;
   document.getElementById("schoolFormType").value = rec.school_type;
+  if (document.getElementById("schoolBlock")) {
+    document.getElementById("schoolBlock").value = rec.block || "";
+  }
   document.getElementById("schoolTeacherName").value = rec.teacher_name;
 
   const sexRadio = document.querySelector(`input[name="schoolSex"][value="${rec.sex}"]`);
@@ -862,6 +874,9 @@ function cancelSchoolEdit() {
 
   const otherSubEl = document.getElementById("schoolOtherSubject");
   if (otherSubEl) otherSubEl.value = "NIL";
+
+  const blockEl = document.getElementById("schoolBlock");
+  if (blockEl) blockEl.value = "";
 
   const editBanner = document.getElementById("schoolEditModeBanner");
   if (editBanner) editBanner.classList.add("hidden");
@@ -955,11 +970,13 @@ async function loadAdminStats() {
 async function loadAdminTeachers() {
   const schoolUdise = document.getElementById("adminFilterSchool").value;
   const schoolType = document.getElementById("adminFilterSchoolType").value;
+  const block = document.getElementById("adminFilterBlock")?.value || "";
   const designation = document.getElementById("adminFilterDesignation").value;
   const search = document.getElementById("adminSearchInput").value.trim();
 
   const params = new URLSearchParams();
   if (schoolUdise && schoolUdise !== "ALL") params.append("udise", schoolUdise);
+  if (block) params.append("block", block);
   if (schoolType) params.append("schoolType", schoolType);
   if (designation) params.append("designation", designation);
   if (search) params.append("search", search);
@@ -985,6 +1002,7 @@ function loadAdminTeachersDebounced() {
 
 function resetAdminFilters() {
   document.getElementById("adminFilterSchool").value = "ALL";
+  if (document.getElementById("adminFilterBlock")) document.getElementById("adminFilterBlock").value = "";
   document.getElementById("adminFilterSchoolType").value = "";
   document.getElementById("adminFilterDesignation").value = "";
   document.getElementById("adminSearchInput").value = "";
@@ -1041,6 +1059,7 @@ function renderAdminTable() {
       <td class="px-4 py-3 font-semibold text-slate-900">${escapeHTML(rec.sl_no)}</td>
       <td class="px-4 py-3 font-mono font-semibold text-blue-900">${escapeHTML(rec.udise_code)}</td>
       <td class="px-4 py-3 font-medium text-slate-900">${escapeHTML(rec.school_name)}</td>
+      <td class="px-4 py-3 font-semibold text-slate-800">${escapeHTML(rec.block || "-")}</td>
       <td class="px-4 py-3"><span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-medium">${escapeHTML(rec.school_type)}</span></td>
       <td class="px-4 py-3 font-semibold text-indigo-950">${escapeHTML(rec.teacher_name)}</td>
       <td class="px-4 py-3">${escapeHTML(rec.sex)}</td>
@@ -1153,6 +1172,7 @@ function openAdminAddTeacherModal() {
   document.getElementById("adminModalTitle").textContent = "Add Teacher Record (Admin Console)";
   document.getElementById("adminModalSchoolSelect").disabled = false;
   document.getElementById("adminModalUdise").value = "";
+  if (document.getElementById("adminModalBlock")) document.getElementById("adminModalBlock").value = "";
   document.getElementById("adminModalOtherSubject").value = "NIL";
   updateAppointmentHighlight('adminModalSchoolType', 'adminModalAppointmentWrapper', 'adminModalAidedBadge', 'adminModalAppointmentNature');
 
@@ -1175,6 +1195,9 @@ function openAdminEditTeacherModal(id) {
   document.getElementById("adminModalUdise").value = rec.udise_code;
   document.getElementById("adminModalSlNo").value = rec.sl_no;
   document.getElementById("adminModalSchoolType").value = rec.school_type;
+  if (document.getElementById("adminModalBlock")) {
+    document.getElementById("adminModalBlock").value = rec.block || "";
+  }
   document.getElementById("adminModalTeacherName").value = rec.teacher_name;
   document.getElementById("adminModalSex").value = rec.sex;
   document.getElementById("adminModalDesignation").value = rec.designation;
@@ -1234,6 +1257,7 @@ document.getElementById("adminTeacherForm").addEventListener("submit", async fun
     udiseCode: udise,
     schoolName: matchedSchool.schoolName,
     schoolType: document.getElementById("adminModalSchoolType").value,
+    block: document.getElementById("adminModalBlock")?.value || "",
     teacherName: document.getElementById("adminModalTeacherName").value.trim(),
     sex: document.getElementById("adminModalSex").value,
     designation: document.getElementById("adminModalDesignation").value,
@@ -1334,6 +1358,7 @@ function generateAndDownloadCSV(records, filename) {
     "Sl No",
     "UDISE CODE",
     "SCHOOL NAME",
+    "BLOCK",
     "SCHOOL TYPE",
     "NAME OF THE TEACHER",
     "SEX",
@@ -1361,6 +1386,7 @@ function generateAndDownloadCSV(records, filename) {
       r.sl_no,
       `\t${r.udise_code}`, // Preserve leading zeros in Excel
       r.school_name,
+      r.block || "",
       r.school_type,
       r.teacher_name,
       r.sex,
@@ -1498,6 +1524,7 @@ async function handleEbsExportSubmit(e) {
     const school = document.getElementById("exportSchoolSelect")?.value || 'ALL';
     const sheet = document.getElementById("exportSheetSelect")?.value || 'ALL';
     const schoolType = document.getElementById("exportSchoolType")?.value || '';
+    const block = document.getElementById("exportBlock")?.value || '';
     const designation = document.getElementById("exportDesignation")?.value || '';
     const mainSubject = document.getElementById("exportMainSubject")?.value || '';
     const search = document.getElementById("exportSearch")?.value || '';
@@ -1507,6 +1534,7 @@ async function handleEbsExportSubmit(e) {
     if (school) params.append('udise', school);
     if (sheet) params.append('sheet', sheet);
     if (schoolType) params.append('schoolType', schoolType);
+    if (block) params.append('block', block);
     if (designation) params.append('designation', designation);
     if (mainSubject) params.append('mainSubject', mainSubject);
     if (search) params.append('search', search);

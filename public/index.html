@@ -401,7 +401,7 @@
           </div>
 
           <!-- 4. SCHOOL TYPE -->
-          <div class="sm:col-span-2 lg:col-span-4">
+          <div class="sm:col-span-1 lg:col-span-2">
             <label for="schoolFormType" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
               SCHOOL TYPE <span class="text-rose-500">*</span>
             </label>
@@ -412,6 +412,22 @@
               <option value="FULLY AIDED">FULLY AIDED</option>
               <option value="PARTIALLY AIDED">PARTIALLY AIDED</option>
               <option value="SELF FINANCE">SELF FINANCE</option>
+            </select>
+          </div>
+
+          <!-- 5. BLOCK -->
+          <div class="sm:col-span-1 lg:col-span-2">
+            <label for="schoolBlock" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
+              BLOCK <span class="text-rose-500">*</span>
+            </label>
+            <select id="schoolBlock" name="block" required
+              class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition">
+              <option value="" disabled selected>-- Select Block --</option>
+              <option value="Killiyoor">Killiyoor</option>
+              <option value="Munchirai">Munchirai</option>
+              <option value="Thuckalay">Thuckalay</option>
+              <option value="Melpuram">Melpuram</option>
+              <option value="Thiruvattar">Thiruvattar</option>
             </select>
           </div>
         </div>
@@ -671,6 +687,7 @@
               <th class="px-4 py-3.5">Sl No</th>
               <th class="px-4 py-3.5">UDISE CODE</th>
               <th class="px-4 py-3.5">SCHOOL NAME</th>
+              <th class="px-4 py-3.5">BLOCK</th>
               <th class="px-4 py-3.5">SCHOOL TYPE</th>
               <th class="px-4 py-3.5">TEACHER NAME</th>
               <th class="px-4 py-3.5">SEX</th>
@@ -824,13 +841,26 @@
           </button>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 text-xs">
           <!-- Filter by School -->
           <div class="sm:col-span-2">
             <label class="block font-semibold text-slate-600 mb-1">Filter By School</label>
             <select id="adminFilterSchool" onchange="loadAdminTeachers()" class="w-full rounded-xl border border-slate-300 p-2.5 outline-none bg-slate-50 focus:bg-white focus:border-indigo-500">
-              <option value="ALL">All 138 District Schools</option>
-              <!-- Filled dynamically with 138 schools -->
+              <option value="ALL">All District Schools</option>
+              <!-- Filled dynamically with 139 schools -->
+            </select>
+          </div>
+
+          <!-- Filter by Block -->
+          <div>
+            <label class="block font-semibold text-slate-600 mb-1">Block</label>
+            <select id="adminFilterBlock" onchange="loadAdminTeachers()" class="w-full rounded-xl border border-slate-300 p-2.5 outline-none bg-slate-50 focus:bg-white focus:border-indigo-500">
+              <option value="">All Blocks</option>
+              <option value="Killiyoor">Killiyoor</option>
+              <option value="Munchirai">Munchirai</option>
+              <option value="Thuckalay">Thuckalay</option>
+              <option value="Melpuram">Melpuram</option>
+              <option value="Thiruvattar">Thiruvattar</option>
             </select>
           </div>
 
@@ -890,6 +920,7 @@
                 <th class="px-4 py-3.5">Sl No</th>
                 <th class="px-4 py-3.5">UDISE CODE</th>
                 <th class="px-4 py-3.5">SCHOOL NAME</th>
+                <th class="px-4 py-3.5">BLOCK</th>
                 <th class="px-4 py-3.5">SCHOOL TYPE</th>
                 <th class="px-4 py-3.5">TEACHER NAME</th>
                 <th class="px-4 py-3.5">SEX</th>
@@ -1009,8 +1040,8 @@
           </div>
         </div>
 
-        <!-- Section 1 details: Sl No, Type -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <!-- Section 1 details: Sl No, Type, Block -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label for="adminModalSlNo" class="block text-xs font-bold text-slate-700 uppercase mb-1">
               Sl No <span class="text-rose-500">*</span>
@@ -1026,6 +1057,19 @@
               <option value="FULLY AIDED">FULLY AIDED</option>
               <option value="PARTIALLY AIDED">PARTIALLY AIDED</option>
               <option value="SELF FINANCE">SELF FINANCE</option>
+            </select>
+          </div>
+          <div>
+            <label for="adminModalBlock" class="block text-xs font-bold text-slate-700 uppercase mb-1">
+              Block <span class="text-rose-500">*</span>
+            </label>
+            <select id="adminModalBlock" required class="w-full rounded-xl border border-slate-300 p-2.5 text-xs outline-none focus:border-indigo-500">
+              <option value="" disabled selected>-- Select Block --</option>
+              <option value="Killiyoor">Killiyoor</option>
+              <option value="Munchirai">Munchirai</option>
+              <option value="Thuckalay">Thuckalay</option>
+              <option value="Melpuram">Melpuram</option>
+              <option value="Thiruvattar">Thiruvattar</option>
             </select>
           </div>
         </div>
@@ -1216,7 +1260,7 @@
             <span class="text-[11px] text-slate-400">Leave blank to export all matching records</span>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <div>
               <label for="exportSchoolType" class="block font-semibold text-slate-600 mb-1">School Type</label>
               <select id="exportSchoolType" class="w-full rounded-xl border border-slate-300 p-2 outline-none bg-white text-xs">
@@ -1225,6 +1269,18 @@
                 <option value="FULLY AIDED">FULLY AIDED</option>
                 <option value="PARTIALLY AIDED">PARTIALLY AIDED</option>
                 <option value="SELF FINANCE">SELF FINANCE</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="exportBlock" class="block font-semibold text-slate-600 mb-1">Block</label>
+              <select id="exportBlock" class="w-full rounded-xl border border-slate-300 p-2 outline-none bg-white text-xs">
+                <option value="">Any Block</option>
+                <option value="Killiyoor">Killiyoor</option>
+                <option value="Munchirai">Munchirai</option>
+                <option value="Thuckalay">Thuckalay</option>
+                <option value="Melpuram">Melpuram</option>
+                <option value="Thiruvattar">Thiruvattar</option>
               </select>
             </div>
 

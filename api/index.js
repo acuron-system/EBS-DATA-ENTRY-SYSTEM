@@ -143,7 +143,7 @@ app.get('/api/auth/me', authenticateToken, (req, res) => {
 app.get('/api/teachers', authenticateToken, async (req, res) => {
   try {
     const { role, schoolUdise } = req.user;
-    const { udise, search, schoolType, designation, mainSubject } = req.query;
+    const { udise, search, schoolType, designation, mainSubject, block } = req.query;
 
     let sql = 'SELECT * FROM teachers';
     const params = [];
@@ -159,6 +159,11 @@ app.get('/api/teachers', authenticateToken, async (req, res) => {
         conditions.push(`udise_code = $${params.length + 1}`);
         params.push(udise);
       }
+    }
+
+    if (block) {
+      conditions.push(`block = $${params.length + 1}`);
+      params.push(block);
     }
 
     if (schoolType) {
@@ -183,6 +188,7 @@ app.get('/api/teachers', authenticateToken, async (req, res) => {
         LOWER(teacher_name) LIKE LOWER($${idx}) OR
         LOWER(udise_code) LIKE LOWER($${idx}) OR
         LOWER(school_name) LIKE LOWER($${idx}) OR
+        LOWER(COALESCE(block, '')) LIKE LOWER($${idx}) OR
         LOWER(main_subject) LIKE LOWER($${idx}) OR
         LOWER(designation) LIKE LOWER($${idx}) OR
         mobile_no LIKE $${idx}
@@ -292,28 +298,29 @@ app.post('/api/teachers', authenticateToken, async (req, res) => {
     const id = 'rec_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
     const slNo = String(body.slNo || '').trim() || '1';
     const schoolType = body.schoolType || 'GOVERNMENT';
+    const block = body.block ? String(body.block).trim() : '';
     const otherSubject = body.otherSubject || 'NIL';
     const appointmentNature = body.appointmentNature || '';
     const remarks = body.remarks || '';
 
     const sql = `
       INSERT INTO teachers (
-        id, sl_no, udise_code, school_name, school_type,
+        id, sl_no, udise_code, school_name, block, school_type,
         teacher_name, sex, designation, qualification,
         main_subject, other_subject, medium_of_teaching,
         dob, date_of_appointment, date_of_retirement,
         appointment_nature, address, area, email_id, mobile_no, remarks
       ) VALUES (
-        $1, $2, $3, $4, $5,
-        $6, $7, $8, $9,
-        $10, $11, $12,
-        $13, $14, $15,
-        $16, $17, $18, $19, $20, $21
+        $1, $2, $3, $4, $5, $6,
+        $7, $8, $9, $10,
+        $11, $12, $13,
+        $14, $15, $16,
+        $17, $18, $19, $20, $21, $22
       )
     `;
 
     const params = [
-      id, slNo, targetUdise, targetSchoolName, schoolType,
+      id, slNo, targetUdise, targetSchoolName, block, schoolType,
       body.teacherName.trim(), body.sex, body.designation, body.qualification.trim(),
       body.mainSubject, otherSubject, body.mediumOfTeaching,
       body.dob, body.dateOfAppointment, body.dateOfRetirement,
@@ -362,6 +369,7 @@ app.put('/api/teachers/:id', authenticateToken, async (req, res) => {
 
     const slNo = body.slNo ? String(body.slNo).trim() : existing.sl_no;
     const schoolType = body.schoolType || existing.school_type;
+    const block = body.block !== undefined ? String(body.block).trim() : (existing.block || '');
     const teacherName = body.teacherName ? body.teacherName.trim() : existing.teacher_name;
     const sex = body.sex || existing.sex;
     const designation = body.designation || existing.designation;
@@ -384,29 +392,30 @@ app.put('/api/teachers/:id', authenticateToken, async (req, res) => {
         sl_no = $1,
         udise_code = $2,
         school_name = $3,
-        school_type = $4,
-        teacher_name = $5,
-        sex = $6,
-        designation = $7,
-        qualification = $8,
-        main_subject = $9,
-        other_subject = $10,
-        medium_of_teaching = $11,
-        dob = $12,
-        date_of_appointment = $13,
-        date_of_retirement = $14,
-        appointment_nature = $15,
-        address = $16,
-        area = $17,
-        email_id = $18,
-        mobile_no = $19,
-        remarks = $20,
+        block = $4,
+        school_type = $5,
+        teacher_name = $6,
+        sex = $7,
+        designation = $8,
+        qualification = $9,
+        main_subject = $10,
+        other_subject = $11,
+        medium_of_teaching = $12,
+        dob = $13,
+        date_of_appointment = $14,
+        date_of_retirement = $15,
+        appointment_nature = $16,
+        address = $17,
+        area = $18,
+        email_id = $19,
+        mobile_no = $20,
+        remarks = $21,
         updated_at = CURRENT_TIMESTAMP
-      WHERE id = $21
+      WHERE id = $22
     `;
 
     const params = [
-      slNo, targetUdise, targetSchoolName, schoolType,
+      slNo, targetUdise, targetSchoolName, block, schoolType,
       teacherName, sex, designation, qualification,
       mainSubject, otherSubject, mediumOfTeaching,
       dob, dateOfAppointment, dateOfRetirement,
@@ -539,7 +548,7 @@ app.get('/api/admin/stats', authenticateToken, requireAdmin, async (req, res) =>
 app.get('/api/export', authenticateToken, async (req, res) => {
   try {
     const { role, schoolUdise } = req.user;
-    const { sheet = 'ALL', format = 'xlsx', udise = 'ALL', schoolType, designation, mainSubject, search } = req.query;
+    const { sheet = 'ALL', format = 'xlsx', udise = 'ALL', schoolType, designation, mainSubject, block, search } = req.query;
 
     let targetUdise = udise;
     if (role === 'school') {
@@ -553,6 +562,11 @@ app.get('/api/export', authenticateToken, async (req, res) => {
     if (targetUdise && targetUdise !== 'ALL') {
       conditions.push(`udise_code = $${params.length + 1}`);
       params.push(targetUdise);
+    }
+
+    if (block) {
+      conditions.push(`block = $${params.length + 1}`);
+      params.push(block);
     }
 
     if (schoolType) {
@@ -577,6 +591,7 @@ app.get('/api/export', authenticateToken, async (req, res) => {
         LOWER(teacher_name) LIKE LOWER($${idx}) OR
         LOWER(udise_code) LIKE LOWER($${idx}) OR
         LOWER(school_name) LIKE LOWER($${idx}) OR
+        LOWER(COALESCE(block, '')) LIKE LOWER($${idx}) OR
         LOWER(main_subject) LIKE LOWER($${idx}) OR
         LOWER(designation) LIKE LOWER($${idx}) OR
         mobile_no LIKE $${idx}
