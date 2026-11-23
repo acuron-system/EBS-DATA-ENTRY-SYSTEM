@@ -187,6 +187,7 @@ app.get('/api/teachers', authenticateToken, async (req, res) => {
         LOWER(udise_code) LIKE LOWER($${idx}) OR
         LOWER(school_name) LIKE LOWER($${idx}) OR
         LOWER(COALESCE(block, '')) LIKE LOWER($${idx}) OR
+        LOWER(medium_of_teaching) LIKE LOWER($${idx}) OR
         LOWER(main_subject) LIKE LOWER($${idx}) OR
         LOWER(designation) LIKE LOWER($${idx}) OR
         mobile_no LIKE $${idx}
@@ -590,6 +591,7 @@ app.get('/api/export', authenticateToken, async (req, res) => {
         LOWER(udise_code) LIKE LOWER($${idx}) OR
         LOWER(school_name) LIKE LOWER($${idx}) OR
         LOWER(COALESCE(block, '')) LIKE LOWER($${idx}) OR
+        LOWER(medium_of_teaching) LIKE LOWER($${idx}) OR
         LOWER(main_subject) LIKE LOWER($${idx}) OR
         LOWER(designation) LIKE LOWER($${idx}) OR
         mobile_no LIKE $${idx}

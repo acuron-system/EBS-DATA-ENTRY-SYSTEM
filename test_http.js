@@ -52,7 +52,7 @@ server.listen(4001, async () => {
         qualification: 'M.A., B.Ed.',
         mainSubject: 'TAMIL',
         otherSubject: 'NIL',
-        mediumOfTeaching: 'Tamil',
+        mediumOfTeaching: 'Both (Tamil & English)',
         dob: '1988-08-12',
         dateOfAppointment: '2015-07-01',
         dateOfRetirement: '2048-08-31',

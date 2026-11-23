@@ -834,7 +834,16 @@ function editSchoolRecord(id) {
   document.getElementById("schoolQualification").value = rec.qualification;
   document.getElementById("schoolMainSubject").value = rec.main_subject;
   document.getElementById("schoolOtherSubject").value = rec.other_subject || "NIL";
-  document.getElementById("schoolMediumOfTeaching").value = rec.medium_of_teaching;
+  const schoolMediumEl = document.getElementById("schoolMediumOfTeaching");
+  if (schoolMediumEl) {
+    schoolMediumEl.value = rec.medium_of_teaching;
+    if (!schoolMediumEl.value && rec.medium_of_teaching) {
+      const match = Array.from(schoolMediumEl.options).find(
+        opt => opt.value.toLowerCase().replace(/\s+/g, '') === rec.medium_of_teaching.toLowerCase().replace(/\s+/g, '')
+      );
+      if (match) schoolMediumEl.value = match.value;
+    }
+  }
   document.getElementById("schoolDob").value = rec.dob;
   document.getElementById("schoolDateOfAppointment").value = rec.date_of_appointment;
   document.getElementById("schoolDateOfRetirement").value = rec.date_of_retirement;
@@ -1204,7 +1213,16 @@ function openAdminEditTeacherModal(id) {
   document.getElementById("adminModalQualification").value = rec.qualification;
   document.getElementById("adminModalMainSubject").value = rec.main_subject;
   document.getElementById("adminModalOtherSubject").value = rec.other_subject || "NIL";
-  document.getElementById("adminModalMedium").value = rec.medium_of_teaching;
+  const adminMediumEl = document.getElementById("adminModalMedium");
+  if (adminMediumEl) {
+    adminMediumEl.value = rec.medium_of_teaching;
+    if (!adminMediumEl.value && rec.medium_of_teaching) {
+      const match = Array.from(adminMediumEl.options).find(
+        opt => opt.value.toLowerCase().replace(/\s+/g, '') === rec.medium_of_teaching.toLowerCase().replace(/\s+/g, '')
+      );
+      if (match) adminMediumEl.value = match.value;
+    }
+  }
   document.getElementById("adminModalDob").value = rec.dob;
   document.getElementById("adminModalDateAppointment").value = rec.date_of_appointment;
   document.getElementById("adminModalDateRetirement").value = rec.date_of_retirement;
