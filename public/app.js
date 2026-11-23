@@ -865,7 +865,13 @@ function editSchoolRecord(id) {
   document.getElementById("schoolDob").value = rec.dob;
   document.getElementById("schoolDateOfAppointment").value = rec.date_of_appointment;
   document.getElementById("schoolDateOfRetirement").value = rec.date_of_retirement;
-  document.getElementById("schoolAppointmentNature").value = rec.appointment_nature || "";
+  const appNatureEl = document.getElementById("schoolAppointmentNature");
+  if (appNatureEl) {
+    appNatureEl.value = rec.appointment_nature || "";
+    if (!appNatureEl.value && rec.appointment_nature && rec.appointment_nature.toLowerCase() === 'approver') {
+      appNatureEl.value = 'Approved';
+    }
+  }
   document.getElementById("schoolAddress").value = rec.address;
   document.getElementById("schoolArea").value = rec.area;
   document.getElementById("schoolEmailId").value = rec.email_id;
@@ -1262,7 +1268,13 @@ function openAdminEditTeacherModal(id) {
   document.getElementById("adminModalDob").value = rec.dob;
   document.getElementById("adminModalDateAppointment").value = rec.date_of_appointment;
   document.getElementById("adminModalDateRetirement").value = rec.date_of_retirement;
-  document.getElementById("adminModalAppointmentNature").value = rec.appointment_nature || "";
+  const adminAppNatureEl = document.getElementById("adminModalAppointmentNature");
+  if (adminAppNatureEl) {
+    adminAppNatureEl.value = rec.appointment_nature || "";
+    if (!adminAppNatureEl.value && rec.appointment_nature && rec.appointment_nature.toLowerCase() === 'approver') {
+      adminAppNatureEl.value = 'Approved';
+    }
+  }
   document.getElementById("adminModalAddress").value = rec.address;
   document.getElementById("adminModalArea").value = rec.area;
   document.getElementById("adminModalEmail").value = rec.email_id;

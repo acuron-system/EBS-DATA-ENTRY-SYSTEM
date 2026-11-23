@@ -56,6 +56,7 @@ server.listen(4001, async () => {
         dob: '1988-08-12',
         dateOfAppointment: '2015-07-01',
         dateOfRetirement: '2048-08-31',
+        appointmentNature: 'Approved',
         address: '45 Temple Street, Marthandam - 629165',
         area: 'Marthandam Town',
         emailId: 'meenakshi.tamil@example.com',
