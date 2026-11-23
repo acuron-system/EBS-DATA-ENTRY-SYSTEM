@@ -838,8 +838,8 @@ function editSchoolRecord(id) {
       const match = Array.from(desigEl.options).find(opt => {
         const optNorm = opt.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
         if (optNorm === recNorm) return true;
-        if (rec.designation.includes('HSS HM') && opt.value.includes('Head Master')) return true;
-        if (rec.designation.includes('HS HM') && opt.value.includes('Head Master')) return true;
+        if ((rec.designation.includes('HSS') || rec.designation === 'Head Master HSS/HS') && opt.value.includes('HSS')) return true;
+        if ((rec.designation.includes('HS HM') || rec.designation.includes('High School') || rec.designation.includes('HIGH SCHOOL')) && opt.value.includes('High School')) return true;
         if (rec.designation.includes('PG') && opt.value.includes('Post Graduate')) return true;
         if (rec.designation.includes('PHYSICAL DIRECTOR') && opt.value.includes('PHYSICAL DIRECTOR GR.I')) return true;
         if (rec.designation.includes('VOCATIONAL') && opt.value.includes('VOCATIONAL INSTRUCTOR GR.I')) return true;
@@ -1241,8 +1241,8 @@ function openAdminEditTeacherModal(id) {
       const match = Array.from(adminDesigEl.options).find(opt => {
         const optNorm = opt.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
         if (optNorm === recNorm) return true;
-        if (rec.designation.includes('HSS HM') && opt.value.includes('Head Master')) return true;
-        if (rec.designation.includes('HS HM') && opt.value.includes('Head Master')) return true;
+        if ((rec.designation.includes('HSS') || rec.designation === 'Head Master HSS/HS') && opt.value.includes('HSS')) return true;
+        if ((rec.designation.includes('HS HM') || rec.designation.includes('High School') || rec.designation.includes('HIGH SCHOOL')) && opt.value.includes('High School')) return true;
         if (rec.designation.includes('PG') && opt.value.includes('Post Graduate')) return true;
         if (rec.designation.includes('PHYSICAL DIRECTOR') && opt.value.includes('PHYSICAL DIRECTOR GR.I')) return true;
         if (rec.designation.includes('VOCATIONAL') && opt.value.includes('VOCATIONAL INSTRUCTOR GR.I')) return true;
