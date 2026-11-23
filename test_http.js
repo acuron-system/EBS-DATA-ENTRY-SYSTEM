@@ -48,7 +48,7 @@ server.listen(4001, async () => {
         block: 'Thuckalay',
         teacherName: 'K. Meenakshi',
         sex: 'Female',
-        designation: 'PG. ASST.',
+        designation: 'Post Graduate Assistant',
         qualification: 'M.A., B.Ed.',
         mainSubject: 'TAMIL',
         otherSubject: 'NIL',

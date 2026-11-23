@@ -830,7 +830,25 @@ function editSchoolRecord(id) {
   const sexRadio = document.querySelector(`input[name="schoolSex"][value="${rec.sex}"]`);
   if (sexRadio) sexRadio.checked = true;
 
-  document.getElementById("schoolDesignation").value = rec.designation;
+  const desigEl = document.getElementById("schoolDesignation");
+  if (desigEl) {
+    desigEl.value = rec.designation;
+    if (!desigEl.value && rec.designation) {
+      const recNorm = rec.designation.toUpperCase().replace(/[^A-Z0-9]/g, '');
+      const match = Array.from(desigEl.options).find(opt => {
+        const optNorm = opt.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        if (optNorm === recNorm) return true;
+        if (rec.designation.includes('HSS HM') && opt.value.includes('Head Master')) return true;
+        if (rec.designation.includes('HS HM') && opt.value.includes('Head Master')) return true;
+        if (rec.designation.includes('PG') && opt.value.includes('Post Graduate')) return true;
+        if (rec.designation.includes('PHYSICAL DIRECTOR') && opt.value.includes('PHYSICAL DIRECTOR GR.I')) return true;
+        if (rec.designation.includes('VOCATIONAL') && opt.value.includes('VOCATIONAL INSTRUCTOR GR.I')) return true;
+        if (rec.designation.includes('COMPUTER') && opt.value.includes('COMPUTER INSTRUCTOR GR.I')) return true;
+        return false;
+      });
+      if (match) desigEl.value = match.value;
+    }
+  }
   document.getElementById("schoolQualification").value = rec.qualification;
   document.getElementById("schoolMainSubject").value = rec.main_subject;
   document.getElementById("schoolOtherSubject").value = rec.other_subject || "NIL";
@@ -1209,7 +1227,25 @@ function openAdminEditTeacherModal(id) {
   }
   document.getElementById("adminModalTeacherName").value = rec.teacher_name;
   document.getElementById("adminModalSex").value = rec.sex;
-  document.getElementById("adminModalDesignation").value = rec.designation;
+  const adminDesigEl = document.getElementById("adminModalDesignation");
+  if (adminDesigEl) {
+    adminDesigEl.value = rec.designation;
+    if (!adminDesigEl.value && rec.designation) {
+      const recNorm = rec.designation.toUpperCase().replace(/[^A-Z0-9]/g, '');
+      const match = Array.from(adminDesigEl.options).find(opt => {
+        const optNorm = opt.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        if (optNorm === recNorm) return true;
+        if (rec.designation.includes('HSS HM') && opt.value.includes('Head Master')) return true;
+        if (rec.designation.includes('HS HM') && opt.value.includes('Head Master')) return true;
+        if (rec.designation.includes('PG') && opt.value.includes('Post Graduate')) return true;
+        if (rec.designation.includes('PHYSICAL DIRECTOR') && opt.value.includes('PHYSICAL DIRECTOR GR.I')) return true;
+        if (rec.designation.includes('VOCATIONAL') && opt.value.includes('VOCATIONAL INSTRUCTOR GR.I')) return true;
+        if (rec.designation.includes('COMPUTER') && opt.value.includes('COMPUTER INSTRUCTOR GR.I')) return true;
+        return false;
+      });
+      if (match) adminDesigEl.value = match.value;
+    }
+  }
   document.getElementById("adminModalQualification").value = rec.qualification;
   document.getElementById("adminModalMainSubject").value = rec.main_subject;
   document.getElementById("adminModalOtherSubject").value = rec.other_subject || "NIL";
